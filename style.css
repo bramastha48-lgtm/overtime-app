@@ -626,6 +626,29 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 .mt-8 { margin-top: 8px; }
 .mb-8 { margin-bottom: 8px; }
 
+/* ===== CLOUD STATUS ===== */
+.cloud-connected, .cloud-disconnected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+}
+.cloud-icon { font-size: 28px; }
+.cloud-name { font-weight: 600; font-size: 14px; }
+.cloud-email { font-size: 12px; color: var(--text-secondary); }
+.cloud-badge {
+    margin-left: auto;
+    background: var(--success-light);
+    color: var(--success);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
 /* ===== BACKUP STATUS ===== */
 .backup-status {
     background: var(--bg);

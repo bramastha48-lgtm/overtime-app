@@ -48,6 +48,10 @@ const DataStore = {
     save(data) {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            // Auto sync to cloud if available
+            if (typeof Cloud !== 'undefined' && Cloud.user) {
+                Cloud.autoSync(data);
+            }
         } catch (e) {
             console.error('Data save error:', e);
         }

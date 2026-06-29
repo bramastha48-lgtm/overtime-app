@@ -385,6 +385,34 @@
             <!-- Settings -->
             <div id="section-settings" class="section">
                 <div class="card">
+                    <div class="card-header"><span>☁️ Sinkronisasi Cloud</span></div>
+                    <div id="cloud-status"></div>
+                    <div id="cloud-login-section">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="cloud-email" placeholder="email@contoh.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="cloud-password" placeholder="Minimal 6 karakter">
+                        </div>
+                        <button class="btn btn-primary" onclick="Cloud.loginEmail(document.getElementById('cloud-email').value, document.getElementById('cloud-password').value)" style="margin-bottom:8px">📧 Login / Daftar Email</button>
+                        <button class="btn btn-secondary" onclick="Cloud.loginGoogle()" style="margin-bottom:8px">🔴 Login Google</button>
+                        <button class="btn btn-secondary" onclick="Cloud.loginAnon()" style="margin-bottom:8px">👤 Login Anonim (Tanpa Registrasi)</button>
+                        <div class="info-box">
+                            <p>☁️ Data akan otomatis tersimpan di cloud</p>
+                            <p>📱 Bisa diakses dari HP lain dengan login yang sama</p>
+                            <p>🔒 Data terenkripsi dan aman</p>
+                        </div>
+                    </div>
+                    <div id="cloud-user-section" style="display:none">
+                        <button class="btn btn-secondary" onclick="Cloud.saveToCloud(DataStore.load()).then(()=>Utils.showResult('settings-result','✅ Data berhasil disinkronkan!','success'))" style="margin-bottom:8px">🔄 Sinkron Sekarang</button>
+                        <button class="btn btn-secondary" onclick="Cloud.loadDataFromCloud().then(()=>Utils.showResult('settings-result','✅ Data berhasil di-restore dari cloud!','success'))" style="margin-bottom:8px">📥 Ambil Data dari Cloud</button>
+                        <button class="btn btn-danger" onclick="Cloud.logout()">🚪 Logout</button>
+                    </div>
+                </div>
+
+                <div class="card">
                     <div class="card-header"><span>👤 Profil Karyawan</span></div>
                     <div class="form-group">
                         <label>Nama</label>
@@ -463,6 +491,7 @@
     <script src="utils.js"></script>
     <script src="data.js"></script>
     <script src="calc.js"></script>
+    <script src="cloud.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

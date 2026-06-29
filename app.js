@@ -43,6 +43,10 @@ const App = {
         Leave.refresh();
         Medical.refresh();
         Hospital.refresh();
+        // Initialize cloud sync
+        if (typeof Cloud !== 'undefined' && Cloud.isConfigured()) {
+            Cloud.init();
+        }
     },
 
     navigate(section) {
