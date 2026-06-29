@@ -385,25 +385,14 @@
             <!-- Settings -->
             <div id="section-settings" class="section">
                 <div class="card">
-                    <div class="card-header"><span>☁️ Sinkronisasi Cloud (GitHub Gist)</span></div>
+                    <div class="card-header"><span>☁️ Backup Cloud (Otomatis)</span></div>
                     <div id="cloud-status"></div>
-                    <div id="cloud-login-section">
-                        <div class="form-group">
-                            <label>GitHub Personal Access Token</label>
-                            <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxx">
-                        </div>
-                        <button class="btn btn-primary" onclick="App.connectGithub()" style="margin-bottom:8px">🔗 Hubungkan ke GitHub</button>
-                        <div class="info-box">
-                            <p>☁️ Data tersimpan di GitHub Gist (private, hanya kamu yang bisa akses)</p>
-                            <p>📱 Login pakai token yang sama di HP lain → data langsung muncul</p>
-                            <p>🔑 Cara buat token: github.com/settings/tokens → Generate new → centang <strong>gist</strong></p>
-                        </div>
+                    <div class="info-box">
+                        <p>✅ Data otomatis tersimpan di cloud setiap kali kamu input absensi/klaim</p>
+                        <p>📱 Tidak perlu registrasi atau login — langsung aktif!</p>
+                        <p>🔒 Setiap HP punya ID unik, data tidak bercampur dengan pengguna lain</p>
                     </div>
-                    <div id="cloud-user-section" style="display:none">
-                        <button class="btn btn-secondary" onclick="Cloud.saveToCloud(DataStore.load()).then(r=>{if(r)Utils.showResult('settings-result','✅ Data berhasil disinkronkan!','success')})" style="margin-bottom:8px">🔄 Sync Sekarang</button>
-                        <button class="btn btn-secondary" onclick="Cloud.loadFromCloud().then(r=>{if(r)Utils.showResult('settings-result','✅ Data berhasil diambil dari cloud!','success')})" style="margin-bottom:8px">📥 Ambil Data dari Cloud</button>
-                        <button class="btn btn-danger" onclick="Cloud.disconnect()">🚪 Putuskan Koneksi</button>
-                    </div>
+                    <button class="btn btn-secondary" onclick="Cloud.manualSync()" style="margin-top:8px">🔄 Sync Manual Sekarang</button>
                 </div>
 
                 <div class="card">

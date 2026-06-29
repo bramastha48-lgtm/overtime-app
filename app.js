@@ -43,13 +43,9 @@ const App = {
         Leave.refresh();
         Medical.refresh();
         Hospital.refresh();
-        // Initialize cloud sync
+        // Auto init cloud sync (no user action needed)
         if (typeof Cloud !== 'undefined') {
-            Cloud.loadCreds();
-            Cloud.updateUI();
-            if (Cloud.isLoggedIn()) {
-                Cloud.loadFromCloud();
-            }
+            Cloud.init();
         }
     },
 
@@ -732,18 +728,6 @@ Klik OK untuk backup sekarang.`)) {
                 DataStore.resetAll();
                 location.reload();
             }
-        }
-    },
-
-    async connectGithub() {
-        const token = document.getElementById('gh-token-input').value.trim();
-        if (!token) return Utils.showResult('settings-result', '❌ Masukkan GitHub token!', 'error');
-
-        const result = await Cloud.connect(token);
-        if (result.success) {
-            Utils.showResult('settings-result', `✅ Terhubung ke GitHub: ${result.user}! Data otomatis tersimpan di cloud.`, 'success');
-        } else {
-            Utils.showResult('settings-result', `❌ Gagal: ${result.error}`, 'error');
         }
     }
 };

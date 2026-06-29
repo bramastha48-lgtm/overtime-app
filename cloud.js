@@ -1,162 +1,128 @@
-/* ===== CLOUD.JS - GitHub Gist Cloud Sync ===== */
+/* ===== CLOUD.JS - Auto Cloud Sync (Zero Config) ===== */
 
 const Cloud = {
     // ========================================
-    // GITHUB GIST STORAGE
-    // Simpan data di GitHub Gist (private)
-    // Cukup 1 token, bisa dipakai di semua device
+    // KONFIGURASI FIREBASE
+    // User TIDAK perlu ganti ini
+    // Cukup buka app, data langsung tersimpan
     // ========================================
+    firebaseConfig: {
+        apiKey: "AIzaSyDummyKey1234567890",
+        authDomain: "lemburku-app.firebaseapp.com",
+        projectId: "lemburku-app",
+        storageBucket: "lemburku-app.appspot.com",
+        messagingSenderId: "123456789012",
+        appId: "1:123456789012:web:xxxxxxxxxxxx"
+    },
 
-    gistId: null,
-    token: null,
+    db: null,
     user: null,
-    syncing: false,
+    initialized: false,
+    ready: false,
 
-    // Load saved credentials
-    loadCreds() {
-        this.token = localStorage.getItem('gh_token');
-        this.gistId = localStorage.getItem('gh_gist_id');
-        this.user = localStorage.getItem('gh_user');
-    },
+    // Initialize Firebase (auto, no user action needed)
+    async init() {
+        if (this.initialized) return this.ready;
+        this.initialized = true;
 
-    // Save credentials
-    saveCreds(token, gistId, user) {
-        this.token = token;
-        this.gistId = gistId;
-        this.user = user;
-        localStorage.setItem('gh_token', token);
-        localStorage.setItem('gh_gist_id', gistId || '');
-        localStorage.setItem('gh_user', user || '');
-    },
-
-    // Is logged in?
-    isLoggedIn() {
-        return !!this.token;
-    },
-
-    // Connect with GitHub token
-    async connect(token) {
-        try {
-            // Verify token and get user info
-            const userRes = await fetch('https://api.github.com/user', {
-                headers: { 'Authorization': `token ${token}` }
-            });
-            if (!userRes.ok) throw new Error('Token tidak valid');
-            const userData = await userRes.json();
-
-            // Check if gist already exists
-            const gistsRes = await fetch('https://api.github.com/gists?per_page=100', {
-                headers: { 'Authorization': `token ${token}` }
-            });
-            const gists = await gistsRes.json();
-
-            // Find existing app gist
-            let gist = gists.find(g =>
-                g.description === 'LemburKu-Data' && g.files && g.files['lembur-data.json']
-            );
-
-            // Create gist if not exists
-            if (!gist) {
-                const createRes = await fetch('https://api.github.com/gists', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        description: 'LemburKu-Data',
-                        public: false,
-                        files: {
-                            'lembur-data.json': {
-                                content: JSON.stringify(DataStore.load(), null, 2)
-                            }
-                        }
-                    })
-                });
-                gist = await createRes.json();
-            }
-
-            this.saveCreds(token, gist.id, userData.login);
+        // Skip if not configured
+        if (this.firebaseConfig.apiKey.includes('Dummy')) {
+            console.log('Firebase not configured, running in offline mode');
             this.updateUI();
+            return false;
+        }
 
-            // Try to load data from cloud
-            await this.loadFromCloud();
+        try {
+            await this.loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+            await this.loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js');
+            await this.loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js');
 
-            return { success: true, user: userData.login };
+            firebase.initializeApp(this.firebaseConfig);
+            this.db = firebase.firestore();
+            this.ready = true;
+
+            // Auto login anonymous
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    this.user = user;
+                    this.updateUI();
+                    this.loadFromCloud();
+                } else {
+                    // Auto sign in anonymously
+                    firebase.auth().signInAnonymously().catch(console.error);
+                }
+            });
+
+            return true;
         } catch (e) {
-            console.error('Connect error:', e);
-            return { success: false, error: e.message };
+            console.error('Firebase init error:', e);
+            this.updateUI();
+            return false;
         }
     },
 
-    // Save data to cloud
+    // Load external script
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    },
+
+    // Save data to cloud (auto, silent)
     async saveToCloud(data) {
-        if (!this.token || !this.gistId || this.syncing) return false;
-        this.syncing = true;
+        if (!this.ready || !this.user || !this.db) return false;
         try {
-            const res = await fetch(`https://api.github.com/gists/${this.gistId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${this.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    files: {
-                        'lembur-data.json': {
-                            content: JSON.stringify(data, null, 2)
-                        }
-                    }
-                })
+            await this.db.collection('users').doc(this.user.uid).set({
+                ...data,
+                _synced: firebase.firestore.FieldValue.serverTimestamp()
             });
-            if (!res.ok) throw new Error('Gagal sync');
-            localStorage.setItem('gh_last_sync', new Date().toISOString());
+            localStorage.setItem('cloud_last_sync', new Date().toISOString());
             this.updateUI();
             return true;
         } catch (e) {
-            console.error('Save to cloud error:', e);
+            console.error('Cloud save error:', e);
             return false;
-        } finally {
-            this.syncing = false;
         }
     },
 
-    // Load data from cloud
+    // Load data from cloud (auto, silent)
     async loadFromCloud() {
-        if (!this.token || !this.gistId) return null;
+        if (!this.ready || !this.user || !this.db) return null;
         try {
-            const res = await fetch(`https://api.github.com/gists/${this.gistId}`, {
-                headers: { 'Authorization': `token ${this.token}` }
-            });
-            if (!res.ok) throw new Error('Gagal load');
-            const gist = await res.json();
-            const content = gist.files['lembur-data.json'].content;
-            const cloudData = JSON.parse(content);
+            const doc = await this.db.collection('users').doc(this.user.uid).get();
+            if (doc.exists) {
+                const cloudData = doc.data();
+                delete cloudData._synced;
 
-            // Merge with local
-            const localData = DataStore.load();
-            const merged = this.mergeData(localData, cloudData);
-            DataStore.save(merged);
+                // Merge with local
+                const localData = DataStore.load();
+                const merged = this.mergeData(localData, cloudData);
+                DataStore.save(merged);
+                localStorage.setItem('cloud_last_sync', new Date().toISOString());
+                this.updateUI();
 
-            localStorage.setItem('gh_last_sync', new Date().toISOString());
-            this.updateUI();
-
-            // Refresh UI
-            if (typeof Dashboard !== 'undefined') Dashboard.refresh();
-            if (typeof Settings !== 'undefined') Settings.loadProfile();
-
-            return merged;
+                // Refresh dashboard
+                if (typeof Dashboard !== 'undefined') Dashboard.refresh();
+                return merged;
+            }
+            // First time: upload local data to cloud
+            await this.saveToCloud(DataStore.load());
+            return null;
         } catch (e) {
-            console.error('Load from cloud error:', e);
+            console.error('Cloud load error:', e);
             return null;
         }
     },
 
-    // Merge local and cloud data (cloud wins on conflict)
+    // Merge local and cloud data
     mergeData(local, cloud) {
         const merged = { ...local };
-        if (cloud.profile && cloud.profile.setupComplete) {
-            merged.profile = cloud.profile;
-        }
+        if (cloud.profile && cloud.profile.setupComplete) merged.profile = cloud.profile;
         merged.attendance = { ...local.attendance, ...cloud.attendance };
 
         const leaveMap = {};
@@ -180,45 +146,68 @@ const Cloud = {
         return merged;
     },
 
-    // Auto sync (debounced)
+    // Auto sync (debounced, silent)
     autoSync(data) {
-        if (!this.token || !this.gistId) return;
+        if (!this.ready || !this.user) return;
         if (this._syncTimeout) clearTimeout(this._syncTimeout);
         this._syncTimeout = setTimeout(() => {
             this.saveToCloud(data);
         }, 3000);
     },
 
-    // Disconnect
-    disconnect() {
-        this.saveCreds('', '', '');
-        this.updateUI();
+    // Manual sync
+    async manualSync() {
+        if (!this.ready) {
+            Utils.showResult('settings-result', '⚠️ Cloud belum siap. Coba lagi dalam beberapa detik.', 'info');
+            return;
+        }
+        if (!this.user) {
+            await firebase.auth().signInAnonymously();
+        }
+        const saved = await this.saveToCloud(DataStore.load());
+        if (saved) {
+            Utils.showResult('settings-result', '✅ Data berhasil disinkronkan ke cloud!', 'success');
+        } else {
+            Utils.showResult('settings-result', '❌ Gagal sync. Coba lagi.', 'error');
+        }
+    },
+
+    // Get cloud user ID (for display)
+    getUid() {
+        return this.user ? this.user.uid.substring(0, 8) + '...' : '-';
     },
 
     // Update UI
     updateUI() {
         const statusEl = document.getElementById('cloud-status');
-        const loginSection = document.getElementById('cloud-login-section');
-        const userSection = document.getElementById('cloud-user-section');
         if (!statusEl) return;
 
-        if (this.isLoggedIn()) {
-            const lastSync = localStorage.getItem('gh_last_sync');
-            const lastSyncText = lastSync
-                ? 'Terakhir sync: ' + new Date(lastSync).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-                : 'Belum pernah sync';
+        if (this.ready && this.user) {
+            const lastSync = localStorage.getItem('cloud_last_sync');
+            const syncText = lastSync
+                ? 'Sync terakhir: ' + new Date(lastSync).toLocaleString('id-ID', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                })
+                : 'Menunggu sync pertama...';
 
             statusEl.innerHTML = `
                 <div class="cloud-connected">
                     <span class="cloud-icon">☁️</span>
                     <div>
-                        <div class="cloud-name">GitHub: ${this.user}</div>
-                        <div class="cloud-email">${lastSyncText}</div>
+                        <div class="cloud-name">Tersinkron otomatis</div>
+                        <div class="cloud-email">${syncText}</div>
                     </div>
-                    <span class="cloud-badge">Tersinkron</span>
+                    <span class="cloud-badge">Online</span>
                 </div>`;
-            if (loginSection) loginSection.style.display = 'none';
-            if (userSection) userSection.style.display = 'block';
+        } else if (this.ready) {
+            statusEl.innerHTML = `
+                <div class="cloud-disconnected">
+                    <span class="cloud-icon">⏳</span>
+                    <div>
+                        <div class="cloud-name">Menghubungkan...</div>
+                        <div class="cloud-email">Tunggu sebentar</div>
+                    </div>
+                </div>`;
         } else {
             statusEl.innerHTML = `
                 <div class="cloud-disconnected">
@@ -228,8 +217,6 @@ const Cloud = {
                         <div class="cloud-email">Data hanya tersimpan di HP ini</div>
                     </div>
                 </div>`;
-            if (loginSection) loginSection.style.display = 'block';
-            if (userSection) userSection.style.display = 'none';
         }
     }
 };
