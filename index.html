@@ -385,12 +385,39 @@
             <!-- Settings -->
             <div id="section-settings" class="section">
                 <div class="card">
+                    <div class="card-header"><span>🔐 Akun Saya</span></div>
+                    <div id="account-status"></div>
+                    <div id="account-login-form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="login-username" placeholder="Masukkan username...">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" placeholder="Masukkan password...">
+                        </div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-primary" onclick="Cloud.loginUser()" style="flex:1">🔑 Login</button>
+                            <button class="btn btn-secondary" onclick="Cloud.registerUser()" style="flex:1">📝 Daftar</button>
+                        </div>
+                        <div id="account-result" class="result-box hidden"></div>
+                    </div>
+                    <div id="account-logged-in" style="display:none">
+                        <div class="info-box">
+                            <p>👤 Login sebagai: <strong id="account-username"></strong></p>
+                            <p>✅ Data tersimpan aman di cloud</p>
+                            <p>🔄 Bisa diakses dari HP lain dengan login yang sama</p>
+                        </div>
+                        <button class="btn btn-danger" onclick="Cloud.logoutUser()" style="margin-top:8px">🚪 Logout</button>
+                    </div>
+                </div>
+
+                <div class="card">
                     <div class="card-header"><span>☁️ Backup Cloud (Otomatis)</span></div>
                     <div id="cloud-status"></div>
                     <div class="info-box">
                         <p>✅ Data otomatis tersimpan di cloud setiap kali kamu input absensi/klaim</p>
-                        <p>📱 Tidak perlu registrasi atau login — langsung aktif!</p>
-                        <p>🔒 Setiap HP punya ID unik, data tidak bercampur dengan pengguna lain</p>
+                        <p>🔒 Data terenkripsi dan aman</p>
                     </div>
                     <button class="btn btn-secondary" onclick="Cloud.manualSync()" style="margin-top:8px">🔄 Sync Manual Sekarang</button>
                 </div>

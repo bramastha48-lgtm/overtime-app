@@ -46,6 +46,7 @@ const Cloud = {
                 if (user) {
                     this.user = user;
                     this.updateUI();
+                    this.updateAccountUI();
                     this.loadFromCloud();
                 } else {
                     // Auto sign in anonymously
@@ -157,49 +158,168 @@ const Cloud = {
 
     // Manual sync
     async manualSync() {
-        // Debug info
-        let debugMsg = '';
-        debugMsg += `Ready: ${this.ready}<br>`;
-        debugMsg += `User: ${this.user ? this.user.uid.substring(0,8) + '...' : 'null'}<br>`;
-        debugMsg += `DB: ${this.db ? 'OK' : 'null'}<br>`;
-
         if (!this.ready) {
-            debugMsg += '⏳ Cloud belum siap, mencoba init...<br>';
             await this.init();
             await new Promise(r => setTimeout(r, 3000));
-            debugMsg += `Ready setelah init: ${this.ready}<br>`;
-            debugMsg += `User setelah init: ${this.user ? this.user.uid.substring(0,8) + '...' : 'null'}<br>`;
         }
         if (!this.user) {
-            debugMsg += '👤 Mencoba login anonim...<br>';
             try {
                 await firebase.auth().signInAnonymously();
-                debugMsg += `User setelah login: ${this.user ? this.user.uid.substring(0,8) + '...' : 'gagal'}<br>`;
             } catch(e) {
-                debugMsg += `❌ Login gagal: ${e.message}<br>`;
+                Utils.showResult('settings-result', '❌ Gagal koneksi ke cloud: ' + e.message, 'error');
+                return;
             }
         }
 
-        const data = DataStore.load();
-        debugMsg += `Data keys: ${Object.keys(data).join(', ')}<br>`;
-        debugMsg += `Profile: ${data.profile.setupComplete ? 'OK' : 'belum setup'}<br>`;
-
-        try {
-            const saved = await this.saveToCloud(data);
-            debugMsg += saved ? '✅ SUKSES tersimpan ke cloud!' : '❌ Gagal menyimpan';
-            if (saved) {
-                debugMsg += `<br>📁 Path: users/${this.user.uid.substring(0,8)}...`;
-            }
-        } catch(e) {
-            debugMsg += `❌ Error: ${e.message}`;
+        const saved = await this.saveToCloud(DataStore.load());
+        if (saved) {
+            Utils.showResult('settings-result', '✅ Data berhasil disinkronkan ke cloud!', 'success');
+        } else {
+            Utils.showResult('settings-result', '❌ Gagal sync. Coba lagi.', 'error');
         }
-
-        Utils.showResult('settings-result', debugMsg, 'info');
     },
 
     // Get cloud user ID (for display)
     getUid() {
         return this.user ? this.user.uid.substring(0, 8) + '...' : '-';
+    },
+
+    // === USERNAME/PASSWORD LOGIN ===
+    _emailFromUsername(username) {
+        return username.toLowerCase().trim() + '@overtime-app.local';
+    },
+
+    async registerUser() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!username) return Utils.showResult('account-result', '❌ Username harus diisi!', 'error');
+        if (username.length < 3) return Utils.showResult('account-result', '❌ Username minimal 3 karakter!', 'error');
+        if (!password || password.length < 6) return Utils.showResult('account-result', '❌ Password minimal 6 karakter!', 'error');
+
+        if (!this.ready) await this.init();
+
+        const email = this._emailFromUsername(username);
+        try {
+            // Save current anonymous data before switching
+            const currentData = DataStore.load();
+
+            // Create new account
+            const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+
+            // Save the username mapping
+            await this.db.collection('usernames').doc(username.toLowerCase()).set({
+                uid: cred.user.uid,
+                created: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Migrate data from anonymous to new account
+            await this._migrateData(currentData);
+
+            Utils.showResult('account-result', '✅ Akun berhasil dibuat! Data sudah dipindahkan.', 'success');
+        } catch (e) {
+            if (e.code === 'auth/email-already-in-use') {
+                Utils.showResult('account-result', '❌ Username sudah dipakai! Coba yang lain.', 'error');
+            } else {
+                Utils.showResult('account-result', '❌ Gagal daftar: ' + e.message, 'error');
+            }
+        }
+    },
+
+    async loginUser() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!username) return Utils.showResult('account-result', '❌ Username harus diisi!', 'error');
+        if (!password) return Utils.showResult('account-result', '❌ Password harus diisi!', 'error');
+
+        if (!this.ready) await this.init();
+
+        const email = this._emailFromUsername(username);
+        try {
+            // Save current anonymous data before switching
+            const currentData = DataStore.load();
+
+            await firebase.auth().signInWithEmailAndPassword(email, password);
+
+            // Merge local data with cloud data
+            await this._migrateData(currentData);
+
+            Utils.showResult('account-result', '✅ Login berhasil! Data sudah disinkronkan.', 'success');
+        } catch (e) {
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
+                Utils.showResult('account-result', '❌ Username atau password salah!', 'error');
+            } else {
+                Utils.showResult('account-result', '❌ Login gagal: ' + e.message, 'error');
+            }
+        }
+    },
+
+    async logoutUser() {
+        try {
+            await firebase.auth().signOut();
+            // Auto sign in as anonymous after logout
+            await firebase.auth().signInAnonymously();
+            this.updateAccountUI();
+            Utils.showResult('account-result', '✅ Logout berhasil. Data lokal tetap tersimpan.', 'success');
+        } catch (e) {
+            Utils.showResult('account-result', '❌ Logout gagal: ' + e.message, 'error');
+        }
+    },
+
+    async _migrateData(localData) {
+        // Wait for auth to settle
+        await new Promise(r => setTimeout(r, 1000));
+
+        if (!this.user) return;
+
+        // Try to load existing cloud data
+        try {
+            const doc = await this.db.collection('users').doc(this.user.uid).get();
+            if (doc.exists) {
+                const cloudData = doc.data();
+                delete cloudData._synced;
+                // Merge: cloud wins on conflict
+                const merged = this.mergeData(localData, cloudData);
+                DataStore.save(merged);
+                await this.saveToCloud(merged);
+            } else {
+                // No cloud data yet, upload local
+                DataStore.save(localData);
+                await this.saveToCloud(localData);
+            }
+        } catch (e) {
+            console.error('Migration error:', e);
+            // Fallback: just save local data
+            DataStore.save(localData);
+            await this.saveToCloud(localData);
+        }
+
+        // Refresh UI
+        if (typeof Dashboard !== 'undefined') Dashboard.refresh();
+        if (typeof Settings !== 'undefined') Settings.loadProfile();
+    },
+
+    updateAccountUI() {
+        const statusEl = document.getElementById('account-status');
+        const loginForm = document.getElementById('account-login-form');
+        const loggedIn = document.getElementById('account-logged-in');
+        const usernameEl = document.getElementById('account-username');
+
+        if (!statusEl) return;
+
+        if (this.user && !this.user.isAnonymous) {
+            // Logged in with username/password
+            const email = this.user.email || '';
+            const username = email.replace('@overtime-app.local', '');
+            loginForm.style.display = 'none';
+            loggedIn.style.display = 'block';
+            if (usernameEl) usernameEl.textContent = username;
+        } else {
+            // Anonymous or not logged in
+            loginForm.style.display = 'block';
+            loggedIn.style.display = 'none';
+        }
     },
 
     // Update UI
