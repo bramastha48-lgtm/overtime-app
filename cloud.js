@@ -157,19 +157,44 @@ const Cloud = {
 
     // Manual sync
     async manualSync() {
+        // Debug info
+        let debugMsg = '';
+        debugMsg += `Ready: ${this.ready}<br>`;
+        debugMsg += `User: ${this.user ? this.user.uid.substring(0,8) + '...' : 'null'}<br>`;
+        debugMsg += `DB: ${this.db ? 'OK' : 'null'}<br>`;
+
         if (!this.ready) {
-            Utils.showResult('settings-result', '⚠️ Cloud belum siap. Coba lagi dalam beberapa detik.', 'info');
-            return;
+            debugMsg += '⏳ Cloud belum siap, mencoba init...<br>';
+            await this.init();
+            await new Promise(r => setTimeout(r, 3000));
+            debugMsg += `Ready setelah init: ${this.ready}<br>`;
+            debugMsg += `User setelah init: ${this.user ? this.user.uid.substring(0,8) + '...' : 'null'}<br>`;
         }
         if (!this.user) {
-            await firebase.auth().signInAnonymously();
+            debugMsg += '👤 Mencoba login anonim...<br>';
+            try {
+                await firebase.auth().signInAnonymously();
+                debugMsg += `User setelah login: ${this.user ? this.user.uid.substring(0,8) + '...' : 'gagal'}<br>`;
+            } catch(e) {
+                debugMsg += `❌ Login gagal: ${e.message}<br>`;
+            }
         }
-        const saved = await this.saveToCloud(DataStore.load());
-        if (saved) {
-            Utils.showResult('settings-result', '✅ Data berhasil disinkronkan ke cloud!', 'success');
-        } else {
-            Utils.showResult('settings-result', '❌ Gagal sync. Coba lagi.', 'error');
+
+        const data = DataStore.load();
+        debugMsg += `Data keys: ${Object.keys(data).join(', ')}<br>`;
+        debugMsg += `Profile: ${data.profile.setupComplete ? 'OK' : 'belum setup'}<br>`;
+
+        try {
+            const saved = await this.saveToCloud(data);
+            debugMsg += saved ? '✅ SUKSES tersimpan ke cloud!' : '❌ Gagal menyimpan';
+            if (saved) {
+                debugMsg += `<br>📁 Path: users/${this.user.uid.substring(0,8)}...`;
+            }
+        } catch(e) {
+            debugMsg += `❌ Error: ${e.message}`;
         }
+
+        Utils.showResult('settings-result', debugMsg, 'info');
     },
 
     // Get cloud user ID (for display)
