@@ -7,7 +7,7 @@ const Cloud = {
     // Cukup buka app, data langsung tersimpan
     // ========================================
     firebaseConfig: {
-        apiKey: "AIzaSyAO9MHQ1anidONDVtnIct6-Vy4RgKvwQ",
+        apiKey: "AIzaSyAGQ9HIMQ1anidONGVtnlct6-Vy4RgKwwQ",
         authDomain: "lemburku-app-58ab9.firebaseapp.com",
         projectId: "lemburku-app-58ab9",
         storageBucket: "lemburku-app-58ab9.firebasestorage.app",
