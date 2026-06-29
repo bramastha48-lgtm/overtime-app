@@ -49,7 +49,7 @@
             <header class="app-header">
                 <h1 id="header-title">Dashboard</h1>
                 <div class="header-actions">
-                    <button class="btn-icon" onclick="App.showPage('settings')" title="Pengaturan">⚙️</button>
+                    <button class="btn-icon" onclick="App.navigate('settings')" title="Pengaturan">⚙️</button>
                 </div>
             </header>
 
@@ -384,6 +384,7 @@
                         </select>
                     </div>
                     <button class="btn btn-primary" onclick="Settings.save()">💾 Simpan Profil</button>
+                    <div id="settings-result" class="result-box hidden"></div>
                 </div>
 
                 <div class="card">

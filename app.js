@@ -53,7 +53,8 @@ const App = {
             attendance: 'Absensi Harian',
             overtime: 'Detail Lemburan',
             medical: 'Klaim & Benefit',
-            leave: 'Cuti Tahunan'
+            leave: 'Cuti Tahunan',
+            settings: 'Pengaturan'
         };
         document.getElementById('header-title').textContent = titles[section] || 'Dashboard';
 
@@ -71,6 +72,7 @@ const App = {
         if (section === 'overtime') Overtime.refresh();
         if (section === 'medical') { Medical.refresh(); Hospital.refresh(); }
         if (section === 'leave') Leave.refresh();
+        if (section === 'settings') Settings.loadProfile();
     },
 
     initMonthSelectors() {
@@ -567,13 +569,13 @@ const Settings = {
         const salary = Utils.parseRupiah(document.getElementById('set-salary').value);
         const family = document.getElementById('set-family').value;
 
-        if (!name) return alert('Nama harus diisi!');
-        if (!salary) return alert('Gaji harus diisi!');
+        if (!name) return Utils.showResult('settings-result', '❌ Nama harus diisi!', 'error');
+        if (!salary) return Utils.showResult('settings-result', '❌ Gaji harus diisi!', 'error');
 
         DataStore.saveProfile({ name, salary, familyStatus: family });
         this.updateInfo();
         Dashboard.refresh();
-        alert('✅ Profil berhasil disimpan!');
+        Utils.showResult('settings-result', `✅ Profil berhasil disimpan!<br>👤 ${name}<br>💰 Gaji: ${Utils.formatRupiah(salary)}`, 'success');
     },
 
     updateInfo() {
