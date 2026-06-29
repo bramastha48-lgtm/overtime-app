@@ -2,21 +2,25 @@
     "name": "Kalkulator Lembur & Benefit",
     "short_name": "LemburKu",
     "description": "Aplikasi penghitungan lembur, cuti, MC, dan rawat inap sesuai Disnaker",
-    "start_url": "/index.html",
+    "start_url": "/overtime-app/",
+    "scope": "/overtime-app/",
     "display": "standalone",
-    "background_color": "#f0f2f5",
+    "background_color": "#1a73e8",
     "theme_color": "#1a73e8",
     "orientation": "portrait",
+    "categories": ["finance", "utilities"],
     "icons": [
         {
             "src": "icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }
