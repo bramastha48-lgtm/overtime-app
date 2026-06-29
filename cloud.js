@@ -7,12 +7,12 @@ const Cloud = {
     // Cukup buka app, data langsung tersimpan
     // ========================================
     firebaseConfig: {
-        apiKey: "AIzaSyDummyKey1234567890",
-        authDomain: "lemburku-app.firebaseapp.com",
-        projectId: "lemburku-app",
-        storageBucket: "lemburku-app.appspot.com",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:xxxxxxxxxxxx"
+        apiKey: "AIzaSyAO9MHQ1anidONDVtnIct6-Vy4RgKvwQ",
+        authDomain: "lemburku-app-58ab9.firebaseapp.com",
+        projectId: "lemburku-app-58ab9",
+        storageBucket: "lemburku-app-58ab9.firebasestorage.app",
+        messagingSenderId: "554408869078",
+        appId: "1:554408869078:web:0a7a15f7a2411499c29d77"
     },
 
     db: null,
