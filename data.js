@@ -23,7 +23,9 @@ const DataStore = {
             hospitalClaims: [],
             // MC balance override (if manually adjusted)
             mcBalanceOverride: null,
-            hospitalBalanceOverride: null
+            hospitalBalanceOverride: null,
+            // Backup tracking
+            lastBackup: null
         };
     },
 

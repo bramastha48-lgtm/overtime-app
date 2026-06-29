@@ -626,6 +626,28 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 .mt-8 { margin-top: 8px; }
 .mb-8 { margin-bottom: 8px; }
 
+/* ===== BACKUP STATUS ===== */
+.backup-status {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.backup-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.backup-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.backup-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

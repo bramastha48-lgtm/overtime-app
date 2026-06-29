@@ -39,6 +39,7 @@ const App = {
         this.navigate('dashboard');
         this.initMonthSelectors();
         Settings.loadProfile();
+        Settings.checkBackupReminder();
         Leave.refresh();
         Medical.refresh();
         Hospital.refresh();
@@ -586,6 +587,7 @@ const Settings = {
         document.getElementById('set-salary').value = Utils.formatNumberInput(profile.salary);
         document.getElementById('set-family').value = profile.familyStatus;
         this.updateInfo();
+        this.updateBackupStatus();
     },
 
     save() {
@@ -640,6 +642,7 @@ const Settings = {
 
     exportData() {
         const data = DataStore.load();
+        data._lastBackup = new Date().toISOString();
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -647,6 +650,72 @@ const Settings = {
         a.download = `backup_lembur_${Utils.today()}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        localStorage.setItem('lastBackup', new Date().toISOString());
+        this.updateBackupStatus();
+        Utils.showResult('settings-result', '✅ Backup berhasil didownload! Simpan file ini di tempat aman.', 'success');
+    },
+
+    importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data.profile || !data.profile.name) {
+                    return Utils.showResult('settings-result', '❌ File backup tidak valid!', 'error');
+                }
+                if (confirm(`Restore data milik "${data.profile.name}"?
+
+Data saat ini akan ditimpa. Lanjutkan?`)) {
+                    DataStore.save(data);
+                    localStorage.setItem('lastBackup', new Date().toISOString());
+                    location.reload();
+                }
+            } catch (err) {
+                Utils.showResult('settings-result', '❌ Gagal membaca file backup!', 'error');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    },
+
+    updateBackupStatus() {
+        const last = localStorage.getItem('lastBackup');
+        const el = document.getElementById('last-backup');
+        if (el) {
+            if (last) {
+                const d = new Date(last);
+                const days = Math.floor((new Date() - d) / 86400000);
+                const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                el.textContent = dateStr;
+                if (days > 7) {
+                    el.style.color = '#d93025';
+                    el.textContent += ' ⚠️ Sudah ' + days + ' hari!';
+                }
+            } else {
+                el.textContent = 'Belum pernah';
+                el.style.color = '#d93025';
+            }
+        }
+    },
+
+    checkBackupReminder() {
+        const last = localStorage.getItem('lastBackup');
+        if (!last) return;
+        const days = Math.floor((new Date() - new Date(last)) / 86400000);
+        if (days >= 7) {
+            setTimeout(() => {
+                if (confirm(`⚠️ Backup terakhir ${days} hari yang lalu!
+
+Disarankan backup sekarang untuk mencegah data hilang.
+
+Klik OK untuk backup sekarang.`)) {
+                    this.exportData();
+                }
+            }, 2000);
+        }
     },
 
     resetAll() {

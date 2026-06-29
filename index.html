@@ -414,9 +414,23 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header"><span>📤 Data</span></div>
-                    <button class="btn btn-secondary" onclick="Settings.exportData()" style="margin-bottom:8px">📥 Export Data (JSON)</button>
-                    <button class="btn btn-danger" onclick="Settings.resetAll()">🗑️ Reset Semua Data</button>
+                    <div class="card-header"><span>☁️ Backup & Restore</span></div>
+                    <div class="backup-status" id="backup-status">
+                        <div class="backup-info">
+                            <span class="backup-label">Terakhir backup:</span>
+                            <span class="backup-value" id="last-backup">Belum pernah</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="Settings.exportData()" style="margin-bottom:8px">📥 Export Backup (JSON)</button>
+                    <label class="btn btn-secondary" style="margin-bottom:8px;cursor:pointer">
+                        📤 Restore dari File
+                        <input type="file" id="import-file" accept=".json" onchange="Settings.importData(event)" style="display:none">
+                    </label>
+                    <div class="info-box">
+                        <p>⚠️ <strong>Penting:</strong> Data tersimpan di browser. Jika hapus cache/riwayat penjelajahan, data akan hilang.</p>
+                        <p>💡 <strong>Tips:</strong> Export backup secara berkala (misalnya setiap hari Jumat setelah gajian).</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="Settings.resetAll()" style="margin-top:8px">🗑️ Reset Semua Data</button>
                 </div>
             </div>
 
