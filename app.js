@@ -377,10 +377,20 @@ const Medical = {
                         <div class="claim-desc">${c.desc || 'Klaim MC'}</div>
                         <div class="claim-payout">Cair: ${Utils.formatDateDisplay(period.payout)}</div>
                     </div>
-                    <div class="claim-amount">- ${Utils.formatRupiah(c.amount)}</div>
+                    <div class="claim-right">
+                        <div class="claim-amount">- ${Utils.formatRupiah(c.amount)}</div>
+                        <button class="btn-icon-sm" onclick="Medical.deleteClaim(${c.id})" title="Hapus">🗑️</button>
+                    </div>
                 </div>`;
         }
         container.innerHTML = html;
+    },
+
+    deleteClaim(id) {
+        if (confirm('Hapus klaim MC ini?')) {
+            DataStore.deleteMcClaim(id);
+            this.refresh();
+        }
     },
 
     claim() {
@@ -451,10 +461,20 @@ const Hospital = {
                         <div class="claim-desc">${c.desc || 'Klaim Rawat Inap'}</div>
                         <div class="claim-payout">Cair: ${Utils.formatDateDisplay(period.payout)}</div>
                     </div>
-                    <div class="claim-amount">- ${Utils.formatRupiah(c.amount)}</div>
+                    <div class="claim-right">
+                        <div class="claim-amount">- ${Utils.formatRupiah(c.amount)}</div>
+                        <button class="btn-icon-sm" onclick="Hospital.deleteClaim(${c.id})" title="Hapus">🗑️</button>
+                    </div>
                 </div>`;
         }
         container.innerHTML = html;
+    },
+
+    deleteClaim(id) {
+        if (confirm('Hapus klaim rawat inap ini?')) {
+            DataStore.deleteHospitalClaim(id);
+            this.refresh();
+        }
     },
 
     claim() {
@@ -531,17 +551,30 @@ const Leave = {
         }
 
         let html = '';
-        for (const l of leaves.slice().reverse()) {
+        const reversed = leaves.slice().reverse();
+        for (let i = 0; i < reversed.length; i++) {
+            const l = reversed[i];
+            const realIndex = leaves.length - 1 - i;
             html += `
                 <div class="leave-item">
                     <div>
                         <div class="leave-item-date">${Utils.formatDateDisplay(l.date)}</div>
                         <div class="leave-item-reason">${l.reason || 'Cuti'}</div>
                     </div>
-                    <div class="leave-item-days">${l.days} hari</div>
+                    <div class="leave-item-right">
+                        <div class="leave-item-days">${l.days} hari</div>
+                        <button class="btn-icon-sm" onclick="Leave.deleteItem(${realIndex})" title="Hapus">🗑️</button>
+                    </div>
                 </div>`;
         }
         container.innerHTML = html;
+    },
+
+    deleteItem(index) {
+        if (confirm('Hapus catatan cuti ini?')) {
+            DataStore.deleteLeave(index);
+            this.refresh();
+        }
     },
 
     updateQuota() {

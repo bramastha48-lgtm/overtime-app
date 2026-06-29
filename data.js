@@ -114,6 +114,14 @@ const DataStore = {
         return data.leaves.reduce((sum, l) => sum + (l.days || 1), 0);
     },
 
+    // Delete leave by index
+    deleteLeave(index) {
+        const data = this.load();
+        data.leaves.splice(index, 1);
+        this.save(data);
+        return data;
+    },
+
     // Update leave quota
     updateLeaveQuota(quota) {
         const data = this.load();
@@ -140,6 +148,14 @@ const DataStore = {
         return data.mcClaims.filter(c => c.date >= startDate && c.date <= endDate);
     },
 
+    // Delete MC claim by id
+    deleteMcClaim(id) {
+        const data = this.load();
+        data.mcClaims = data.mcClaims.filter(c => c.id !== id);
+        this.save(data);
+        return data;
+    },
+
     // Get hospital claims
     getHospitalClaims() {
         return this.load().hospitalClaims;
@@ -157,6 +173,14 @@ const DataStore = {
     getHospitalClaimsForPeriod(startDate, endDate) {
         const data = this.load();
         return data.hospitalClaims.filter(c => c.date >= startDate && c.date <= endDate);
+    },
+
+    // Delete hospital claim by id
+    deleteHospitalClaim(id) {
+        const data = this.load();
+        data.hospitalClaims = data.hospitalClaims.filter(c => c.id !== id);
+        this.save(data);
+        return data;
     },
 
     // Reset all data

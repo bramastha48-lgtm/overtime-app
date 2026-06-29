@@ -172,6 +172,17 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
     transition: background 0.2s;
 }
 .btn-icon:hover { background: var(--primary-light); }
+.btn-icon-sm {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background 0.2s;
+    line-height: 1;
+}
+.btn-icon-sm:hover { background: #fce4e4; }
 
 /* ===== HEADER ===== */
 .app-header {
@@ -494,6 +505,11 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
     color: var(--danger);
     font-size: 14px;
 }
+.claim-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .claim-empty {
     text-align: center;
     color: var(--text-secondary);
@@ -567,6 +583,11 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 .leave-item-days {
     font-size: 12px;
     color: var(--text-secondary);
+}
+.leave-item-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 .leave-item-reason {
     font-size: 11px;
