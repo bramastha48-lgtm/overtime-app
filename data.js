@@ -11,6 +11,7 @@ const DataStore = {
                 salary: 0,
                 familyStatus: 'single',
                 leaveQuota: 12,
+                mealAllowance: 30000,
                 setupComplete: false
             },
             // Daily attendance: { "2026-06-25": { type, present, overtimeEnd, weekendStart, weekendEnd, ... } }
@@ -23,9 +24,7 @@ const DataStore = {
             hospitalClaims: [],
             // MC balance override (if manually adjusted)
             mcBalanceOverride: null,
-            hospitalBalanceOverride: null,
-            // Backup tracking
-            lastBackup: null
+            hospitalBalanceOverride: null
         };
     },
 

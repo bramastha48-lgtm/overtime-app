@@ -147,7 +147,8 @@ const Calc = {
         let overtime = 0;
         let otHours = 0;
         let detail = '';
-        const meal = 30000; // Fixed 30k per day
+        const profile = DataStore.getProfile();
+        const meal = profile.mealAllowance || 30000;
 
         if (attendance.type === 'weekday') {
             const result = this.calcWeekdayOvertime(salary, attendance.overtimeEnd);

@@ -23,12 +23,13 @@ const App = {
         const salary = Utils.parseRupiah(document.getElementById('input-salary').value);
         const family = document.getElementById('input-family').value;
         const leaveQuota = parseInt(document.getElementById('input-leave-quota').value) || 0;
+        const mealAllowance = Utils.parseRupiah(document.getElementById('input-meal').value) || 30000;
 
         if (!name) return alert('Nama harus diisi!');
         if (!salary || salary < 1) return alert('Gaji harus diisi!');
 
         DataStore.saveProfile({
-            name, salary, familyStatus: family, leaveQuota, setupComplete: true
+            name, salary, familyStatus: family, leaveQuota, mealAllowance, setupComplete: true
         });
 
         this.showMainApp();
@@ -39,7 +40,6 @@ const App = {
         this.navigate('dashboard');
         this.initMonthSelectors();
         Settings.loadProfile();
-        Settings.checkBackupReminder();
         Leave.refresh();
         Medical.refresh();
         Hospital.refresh();
@@ -590,8 +590,18 @@ const Settings = {
         document.getElementById('set-name').value = profile.name;
         document.getElementById('set-salary').value = Utils.formatNumberInput(profile.salary);
         document.getElementById('set-family').value = profile.familyStatus;
+        document.getElementById('set-meal').value = Utils.formatNumberInput(profile.mealAllowance || 30000);
         this.updateInfo();
-        this.updateBackupStatus();
+    },
+
+    saveMeal() {
+        const mealAllowance = Utils.parseRupiah(document.getElementById('set-meal').value);
+        if (!mealAllowance || mealAllowance < 1) return Utils.showResult('meal-result', '❌ Masukkan jumlah uang makan!', 'error');
+
+        DataStore.saveProfile({ mealAllowance });
+        Dashboard.refresh();
+        Overtime.refresh();
+        Utils.showResult('meal-result', `✅ Uang makan berhasil diubah menjadi ${Utils.formatRupiah(mealAllowance)} / hari`, 'success');
     },
 
     save() {
@@ -634,7 +644,7 @@ const Settings = {
             <p>• Istirahat weekday lembur: 18:00-18:30 (30 menit)</p>
             <p>• Istirahat weekend/libur: 12:00-13:00 (1 jam)</p>
             <br>
-            <p><strong>🍽️ Uang Makan:</strong> Rp 30.000 / hari masuk</p>
+            <p><strong>🍽️ Uang Makan:</strong> ${Utils.formatRupiah(profile.mealAllowance || 30000)} / hari masuk</p>
             <br>
             <p><strong>🏥 Saldo MC:</strong> ${Utils.formatRupiah(mcBalance)}</p>
             <p><strong>🛏️ Saldo Rawat Inap:</strong> ${Utils.formatRupiah(hospBalance)}</p>
@@ -644,89 +654,13 @@ const Settings = {
         `;
     },
 
-    exportData() {
-        const data = DataStore.load();
-        data._lastBackup = new Date().toISOString();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `backup_lembur_${Utils.today()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        localStorage.setItem('lastBackup', new Date().toISOString());
-        this.updateBackupStatus();
-        Utils.showResult('settings-result', '✅ Backup berhasil didownload! Simpan file ini di tempat aman.', 'success');
-    },
-
-    importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (!data.profile || !data.profile.name) {
-                    return Utils.showResult('settings-result', '❌ File backup tidak valid!', 'error');
-                }
-                if (confirm(`Restore data milik "${data.profile.name}"?
-
-Data saat ini akan ditimpa. Lanjutkan?`)) {
-                    DataStore.save(data);
-                    localStorage.setItem('lastBackup', new Date().toISOString());
-                    location.reload();
-                }
-            } catch (err) {
-                Utils.showResult('settings-result', '❌ Gagal membaca file backup!', 'error');
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-    },
-
-    updateBackupStatus() {
-        const last = localStorage.getItem('lastBackup');
-        const el = document.getElementById('last-backup');
-        if (el) {
-            if (last) {
-                const d = new Date(last);
-                const days = Math.floor((new Date() - d) / 86400000);
-                const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                el.textContent = dateStr;
-                if (days > 7) {
-                    el.style.color = '#d93025';
-                    el.textContent += ' ⚠️ Sudah ' + days + ' hari!';
-                }
-            } else {
-                el.textContent = 'Belum pernah';
-                el.style.color = '#d93025';
-            }
-        }
-    },
-
-    checkBackupReminder() {
-        const last = localStorage.getItem('lastBackup');
-        if (!last) return;
-        const days = Math.floor((new Date() - new Date(last)) / 86400000);
-        if (days >= 7) {
-            setTimeout(() => {
-                if (confirm(`⚠️ Backup terakhir ${days} hari yang lalu!
-
-Disarankan backup sekarang untuk mencegah data hilang.
-
-Klik OK untuk backup sekarang.`)) {
-                    this.exportData();
-                }
-            }, 2000);
-        }
-    },
-
     resetAll() {
-        if (confirm('⚠️ SEMUA DATA AKAN DIHAPUS!\n\nApakah Anda yakin?')) {
-            if (confirm('Konfirmasi sekali lagi: Hapus semua data?')) {
+        if (confirm('⚠️ SEMUA DATA AKAN DIHAPUS!\n\nIni akan menghapus:\n• Profil karyawan\n• Semua data absensi\n• Semua klaim MC & rawat inap\n• Semua catatan cuti\n\nApakah Anda yakin?')) {
+            if (confirm('Konfirmasi sekali lagi: Hapus SEMUA data?')) {
+                localStorage.clear();
                 DataStore.resetAll();
-                location.reload();
+                Utils.showResult('reset-result', '✅ Semua data berhasil direset! Memuat ulang...', 'success');
+                setTimeout(() => location.reload(), 1000);
             }
         }
     }
@@ -735,7 +669,7 @@ Klik OK untuk backup sekarang.`)) {
 // === Rupiah Input Formatting ===
 document.addEventListener('DOMContentLoaded', () => {
     // Format rupiah inputs
-    const rupiahInputs = ['input-salary', 'set-salary', 'mc-claim-amount', 'hospital-claim-amount'];
+    const rupiahInputs = ['input-salary', 'set-salary', 'input-meal', 'set-meal', 'mc-claim-amount', 'hospital-claim-amount'];
     rupiahInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
