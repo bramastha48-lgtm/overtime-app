@@ -79,6 +79,7 @@ const App = {
         const options = Utils.getMonthOptions();
         const dashMonth = document.getElementById('dashboard-month');
         const otMonth = document.getElementById('ot-month');
+        const currentMonth = Utils.today().substring(0, 7);
 
         [dashMonth, otMonth].forEach(sel => {
             sel.innerHTML = '';
@@ -86,6 +87,7 @@ const App = {
                 const opt = document.createElement('option');
                 opt.value = o.val;
                 opt.textContent = o.label;
+                if (o.val === currentMonth) opt.selected = true;
                 sel.appendChild(opt);
             });
         });
@@ -145,6 +147,7 @@ const Attendance = {
             dateInput.value = Utils.today();
         }
         this.loadDate();
+        this.loadRecap();
     },
 
     loadDate() {
@@ -171,17 +174,14 @@ const Attendance = {
             // Auto-detect type
             if (Utils.isWeekend(dateStr)) {
                 this.setType('weekend');
+                document.getElementById('att-wk-start').value = '08:00';
+                document.getElementById('att-wk-end').value = '17:00';
             } else {
                 this.setType('weekday');
+                document.getElementById('att-present').value = 'yes';
+                document.getElementById('att-ot-end').value = 'none';
+                this.togglePresent();
             }
-            // Reset fields
-            document.getElementById('att-present').value = 'yes';
-            document.getElementById('att-ot-end').value = 'none';
-            document.getElementById('att-wk-start').value = '08:00';
-            document.getElementById('att-wk-end').value = '17:00';
-            document.getElementById('att-hol-present').value = 'yes';
-            document.getElementById('att-hol-start').value = '08:00';
-            document.getElementById('att-hol-end').value = '17:00';
         }
     },
 

@@ -30,14 +30,17 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
 }
 input, select, button, textarea { font-family: inherit; font-size: inherit; }
 
 /* ===== APP LAYOUT ===== */
-#app { min-height: 100vh; }
+#app { min-height: 100vh; min-height: 100dvh; }
 .page { display: none; }
-.page.active { display: block; }
+.page.active { display: block; min-height: 100vh; min-height: 100dvh; }
 
 /* ===== SETUP PAGE ===== */
 .setup-container {
@@ -45,6 +48,7 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
     margin: 0 auto;
     padding: 40px 20px;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -542,6 +546,7 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
     box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
     z-index: 100;
     padding-bottom: env(safe-area-inset-bottom, 0);
+    height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
 }
 .nav-btn {
     flex: 1;
