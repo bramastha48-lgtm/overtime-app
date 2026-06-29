@@ -134,6 +134,30 @@ const Dashboard = {
         document.querySelector('.payout-date').textContent = Utils.formatDateDisplay(nextPayout.payout);
         document.querySelector('.payout-period').textContent =
             `Periode: ${Utils.formatDateDisplay(nextPayout.start)} - ${Utils.formatDateDisplay(nextPayout.end)}`;
+
+        // Calculate payout amounts for this period
+        const allAttendance = DataStore.load().attendance;
+        let periodOvertime = 0;
+        let periodMeal = 0;
+        for (const [dateStr, record] of Object.entries(allAttendance)) {
+            if (dateStr >= nextPayout.start && dateStr <= nextPayout.end && record.present) {
+                const earning = Calc.calcDayEarning(profile.salary, record);
+                periodOvertime += earning.overtime;
+                periodMeal += earning.meal;
+            }
+        }
+        const periodMcClaims = DataStore.getMcClaims().filter(c =>
+            c.date >= nextPayout.start && c.date <= nextPayout.end);
+        const periodMc = periodMcClaims.reduce((s, c) => s + c.amount, 0);
+        const periodHospitalClaims = DataStore.getHospitalClaims().filter(c =>
+            c.date >= nextPayout.start && c.date <= nextPayout.end);
+        const periodHospital = periodHospitalClaims.reduce((s, c) => s + c.amount, 0);
+        const periodTotal = periodOvertime + periodMeal + periodMc + periodHospital;
+
+        document.getElementById('payout-overtime').textContent = Utils.formatRupiah(periodOvertime);
+        document.getElementById('payout-meal').textContent = Utils.formatRupiah(periodMeal);
+        document.getElementById('payout-mc').textContent = Utils.formatRupiah(periodMc + periodHospital);
+        document.getElementById('payout-total').textContent = Utils.formatRupiah(periodTotal);
     }
 };
 

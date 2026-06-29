@@ -314,6 +314,27 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 .payout-period {
     font-size: 13px;
     color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+.payout-breakdown {
+    text-align: left;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+}
+.payout-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.payout-row.payout-total {
+    border-top: 1.5px solid var(--border);
+    margin-top: 4px;
+    padding-top: 10px;
+    font-size: 15px;
+    color: var(--text);
 }
 
 /* ===== ATTENDANCE ===== */
