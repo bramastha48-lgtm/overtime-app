@@ -385,30 +385,24 @@
             <!-- Settings -->
             <div id="section-settings" class="section">
                 <div class="card">
-                    <div class="card-header"><span>☁️ Sinkronisasi Cloud</span></div>
+                    <div class="card-header"><span>☁️ Sinkronisasi Cloud (GitHub Gist)</span></div>
                     <div id="cloud-status"></div>
                     <div id="cloud-login-section">
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="cloud-email" placeholder="email@contoh.com">
+                            <label>GitHub Personal Access Token</label>
+                            <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxx">
                         </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" id="cloud-password" placeholder="Minimal 6 karakter">
-                        </div>
-                        <button class="btn btn-primary" onclick="Cloud.loginEmail(document.getElementById('cloud-email').value, document.getElementById('cloud-password').value)" style="margin-bottom:8px">📧 Login / Daftar Email</button>
-                        <button class="btn btn-secondary" onclick="Cloud.loginGoogle()" style="margin-bottom:8px">🔴 Login Google</button>
-                        <button class="btn btn-secondary" onclick="Cloud.loginAnon()" style="margin-bottom:8px">👤 Login Anonim (Tanpa Registrasi)</button>
+                        <button class="btn btn-primary" onclick="App.connectGithub()" style="margin-bottom:8px">🔗 Hubungkan ke GitHub</button>
                         <div class="info-box">
-                            <p>☁️ Data akan otomatis tersimpan di cloud</p>
-                            <p>📱 Bisa diakses dari HP lain dengan login yang sama</p>
-                            <p>🔒 Data terenkripsi dan aman</p>
+                            <p>☁️ Data tersimpan di GitHub Gist (private, hanya kamu yang bisa akses)</p>
+                            <p>📱 Login pakai token yang sama di HP lain → data langsung muncul</p>
+                            <p>🔑 Cara buat token: github.com/settings/tokens → Generate new → centang <strong>gist</strong></p>
                         </div>
                     </div>
                     <div id="cloud-user-section" style="display:none">
-                        <button class="btn btn-secondary" onclick="Cloud.saveToCloud(DataStore.load()).then(()=>Utils.showResult('settings-result','✅ Data berhasil disinkronkan!','success'))" style="margin-bottom:8px">🔄 Sinkron Sekarang</button>
-                        <button class="btn btn-secondary" onclick="Cloud.loadDataFromCloud().then(()=>Utils.showResult('settings-result','✅ Data berhasil di-restore dari cloud!','success'))" style="margin-bottom:8px">📥 Ambil Data dari Cloud</button>
-                        <button class="btn btn-danger" onclick="Cloud.logout()">🚪 Logout</button>
+                        <button class="btn btn-secondary" onclick="Cloud.saveToCloud(DataStore.load()).then(r=>{if(r)Utils.showResult('settings-result','✅ Data berhasil disinkronkan!','success')})" style="margin-bottom:8px">🔄 Sync Sekarang</button>
+                        <button class="btn btn-secondary" onclick="Cloud.loadFromCloud().then(r=>{if(r)Utils.showResult('settings-result','✅ Data berhasil diambil dari cloud!','success')})" style="margin-bottom:8px">📥 Ambil Data dari Cloud</button>
+                        <button class="btn btn-danger" onclick="Cloud.disconnect()">🚪 Putuskan Koneksi</button>
                     </div>
                 </div>
 
