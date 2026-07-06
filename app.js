@@ -47,10 +47,7 @@ const App = {
         if (typeof Cloud !== 'undefined') {
             Cloud.init();
         }
-        // Init calendar & notifications
-        if (typeof WorkCalendar !== 'undefined') {
-            WorkCalendar.init();
-        }
+        // Init notifications
         if (typeof Notif !== 'undefined') {
             Notif.init();
         }
@@ -66,7 +63,6 @@ const App = {
             overtime: 'Detail Lemburan',
             medical: 'Klaim & Benefit',
             leave: 'Cuti Tahunan',
-            calendar: 'Kalender Kerja',
             settings: 'Pengaturan'
         };
         document.getElementById('header-title').textContent = titles[section] || 'Dashboard';
@@ -85,7 +81,6 @@ const App = {
         if (section === 'overtime') Overtime.refresh();
         if (section === 'medical') { Medical.refresh(); Hospital.refresh(); }
         if (section === 'leave') Leave.refresh();
-        if (section === 'calendar') WorkCalendar.init();
         if (section === 'settings') {
             Settings.loadProfile();
             Notif.updateUI();
@@ -175,6 +170,78 @@ const Dashboard = {
         document.getElementById('payout-meal').textContent = Utils.formatRupiah(periodMeal);
         document.getElementById('payout-mc').textContent = Utils.formatRupiah(periodMc + periodHospital);
         document.getElementById('payout-total').textContent = Utils.formatRupiah(periodTotal);
+
+        // Update incentive
+        this.refreshIncentive(yearMonth);
+    },
+
+    refreshIncentive(yearMonth) {
+        const lateMinutes = Incentive.getMonthlyLate(yearMonth);
+        const threshold = 20;
+        const eligible = lateMinutes <= threshold;
+        const now = new Date();
+        const currentMonth = Utils.today().substring(0, 7);
+        const isCurrentMonth = yearMonth === currentMonth;
+
+        const box = document.getElementById('incentive-box');
+        const icon = document.getElementById('incentive-icon');
+        const title = document.getElementById('incentive-title');
+        const desc = document.getElementById('incentive-desc');
+        const bar = document.getElementById('incentive-bar');
+        const detail = document.getElementById('incentive-detail');
+
+        if (eligible) {
+            box.className = 'incentive-box eligible';
+            icon.textContent = '✅';
+            title.textContent = 'Layak Insentif';
+            desc.textContent = `Akumulasi telat: ${lateMinutes} / ${threshold} menit`;
+            bar.style.width = `${Math.min(100, (lateMinutes / threshold) * 100)}%`;
+            bar.className = 'incentive-bar bar-safe';
+            detail.textContent = '💰 Insentif Rp 100.000 cair tanggal 25';
+        } else {
+            box.className = 'incentive-box not-eligible';
+            icon.textContent = '❌';
+            title.textContent = 'Insentif Hangus';
+            desc.textContent = `Akumulasi telat: ${lateMinutes} / ${threshold} menit (lewat ${lateMinutes - threshold} menit)`;
+            bar.style.width = '100%';
+            bar.className = 'incentive-bar bar-danger';
+            detail.textContent = '⚠️ Keterlambatan melebihi batas 20 menit/bulan';
+        }
+    }
+};
+
+// === INCENTIVE ===
+const Incentive = {
+    /**
+     * Calculate total late minutes for a month
+     * Only counts weekday (Mon-Fri) attendance
+     */
+    getMonthlyLate(yearMonth) {
+        const records = DataStore.getAttendanceForMonth(yearMonth);
+        let totalLate = 0;
+
+        for (const [dateStr, record] of Object.entries(records)) {
+            if (record.type === 'weekday' && record.present && record.arrival) {
+                const arrivalMinutes = Utils.parseTime(record.arrival);
+                const workStart = 8 * 60; // 08:00
+                if (arrivalMinutes > workStart) {
+                    totalLate += (arrivalMinutes - workStart);
+                }
+            }
+        }
+        return totalLate;
+    },
+
+    /**
+     * Get incentive status for display
+     */
+    getStatus(yearMonth) {
+        const late = this.getMonthlyLate(yearMonth);
+        return {
+            lateMinutes: late,
+            eligible: late <= 20,
+            overBy: Math.max(0, late - 20)
+        };
     }
 };
 
@@ -200,6 +267,7 @@ const Attendance = {
             this.setType(record.type);
             if (record.type === 'weekday') {
                 document.getElementById('att-present').value = record.present ? 'yes' : 'no';
+                document.getElementById('att-arrival').value = record.arrival || '08:00';
                 document.getElementById('att-ot-end').value = record.overtimeEnd || 'none';
                 this.togglePresent();
             } else if (record.type === 'weekend') {
@@ -220,6 +288,7 @@ const Attendance = {
             } else {
                 this.setType('weekday');
                 document.getElementById('att-present').value = 'yes';
+                document.getElementById('att-arrival').value = '08:00';
                 document.getElementById('att-ot-end').value = 'none';
                 this.togglePresent();
             }
@@ -254,6 +323,7 @@ const Attendance = {
 
         if (this.currentType === 'weekday') {
             record.present = document.getElementById('att-present').value === 'yes';
+            record.arrival = document.getElementById('att-arrival').value || '08:00';
             record.overtimeEnd = document.getElementById('att-ot-end').value;
         } else if (this.currentType === 'weekend') {
             record.present = true; // Weekend always "present" if recorded
@@ -282,6 +352,25 @@ const Attendance = {
             if (earning.detail) msg += ` (${earning.detail})`;
             msg += `<br>🍽️ Uang Makan: ${Utils.formatRupiah(earning.meal)}`;
             msg += `<br><strong>Total: ${Utils.formatRupiah(earning.overtime + earning.meal)}</strong>`;
+
+            // Show late info for weekday
+            if (record.type === 'weekday' && record.arrival) {
+                const arrivalMin = Utils.parseTime(record.arrival);
+                const workStart = 8 * 60;
+                if (arrivalMin > workStart) {
+                    const lateMin = arrivalMin - workStart;
+                    const yearMonth = dateStr.substring(0, 7);
+                    const totalLate = Incentive.getMonthlyLate(yearMonth);
+                    msg += `<br>⏰ Telat: ${lateMin} menit | Akumulasi bulan ini: ${totalLate} / 20 menit`;
+                    if (totalLate > 20) {
+                        msg += ` <span style="color:#d93025;font-weight:700">❌ Insentif hangus!</span>`;
+                    } else {
+                        msg += ` <span style="color:#0d904f;font-weight:700">✅ Aman</span>`;
+                    }
+                } else {
+                    msg += `<br>⏰ Tepat waktu ✅`;
+                }
+            }
         } else {
             msg += `Tidak masuk - tidak ada pendapatan`;
         }
@@ -310,9 +399,20 @@ const Attendance = {
             const statusText = record.present ? 'Masuk' : 'Tidak Masuk';
             const typeLabel = record.type === 'holiday' ? ' 🔴' : record.type === 'weekend' ? ' 📅' : '';
 
+            // Late indicator
+            let lateBadge = '';
+            if (record.type === 'weekday' && record.present && record.arrival) {
+                const arrivalMin = Utils.parseTime(record.arrival);
+                const workStart = 8 * 60;
+                if (arrivalMin > workStart) {
+                    const lateMin = arrivalMin - workStart;
+                    lateBadge = ` <span class="late-badge">${lateMin}m</span>`;
+                }
+            }
+
             html += `
                 <div class="att-recap-item">
-                    <span class="att-recap-date">${Utils.formatDateDisplay(dateStr)}${typeLabel}</span>
+                    <span class="att-recap-date">${Utils.formatDateDisplay(dateStr)}${typeLabel}${lateBadge}</span>
                     <span class="att-recap-status ${statusClass}">${statusText}</span>
                     <span class="att-recap-amount">${record.present ? Utils.formatRupiah(earning.overtime + earning.meal) : '-'}</span>
                 </div>`;
@@ -696,6 +796,11 @@ const Settings = {
             <br>
             <p><strong>📅 Siklus Pencairan:</strong></p>
             <p>Periode Kamis → Rabu, cair Jumat minggu ke-2</p>
+            <br>
+            <p><strong>🎯 Insentif:</strong></p>
+            <p>• Akumulasi telat ≤ 20 menit/bulan → Rp 100.000</p>
+            <p>• Akumulasi telat > 20 menit/bulan → insentif hangus</p>
+            <p>• Cair tanggal 25 setiap bulan</p>
         `;
     },
 

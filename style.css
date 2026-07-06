@@ -700,6 +700,93 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
     border-radius: 4px;
 }
 
+/* ===== INCENTIVE ===== */
+.incentive-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    transition: all 0.3s;
+}
+.incentive-box.eligible {
+    background: var(--success-light);
+    border: 1.5px solid var(--success);
+}
+.incentive-box.not-eligible {
+    background: var(--danger-light);
+    border: 1.5px solid var(--danger);
+}
+.incentive-icon {
+    font-size: 36px;
+    flex-shrink: 0;
+}
+.incentive-info {
+    flex: 1;
+    min-width: 0;
+}
+.incentive-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+.incentive-box.eligible .incentive-title { color: var(--success); }
+.incentive-box.not-eligible .incentive-title { color: var(--danger); }
+.incentive-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.incentive-bar-wrap {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+.incentive-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+.incentive-bar.bar-safe { background: var(--success); }
+.incentive-bar.bar-danger { background: var(--danger); }
+.incentive-detail {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ===== LATE BADGE ===== */
+.late-badge {
+    display: inline-block;
+    background: var(--danger-light);
+    color: var(--danger);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* ===== NOTIFICATION STYLES ===== */
+.notif-section { margin-top: 8px; }
+.notif-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+}
+.notif-icon { font-size: 28px; }
+.notif-info { flex: 1; }
+.notif-title { font-weight: 600; font-size: 14px; }
+.notif-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.notif-status { font-size: 12px; margin-top: 8px; font-weight: 600; }
+
 /* ===== RESPONSIVE ===== */
 @media (min-width: 600px) {
     .section { padding: 16px 20px calc(var(--nav-height) + 20px); }

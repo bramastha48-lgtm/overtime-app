@@ -9,7 +9,6 @@
     <meta name="theme-color" content="#1a73e8">
     <title>Kalkulator Lembur & Benefit</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="calendar-style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -84,6 +83,22 @@
                         <div class="summary-item highlight">
                             <div class="summary-label">Total Pendapatan Extra</div>
                             <div class="summary-value" id="sum-total">Rp 0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insentif Card -->
+                <div class="card">
+                    <div class="card-header"><span>🎯 Insentif Bulanan</span></div>
+                    <div class="incentive-box" id="incentive-box">
+                        <div class="incentive-icon" id="incentive-icon">✅</div>
+                        <div class="incentive-info">
+                            <div class="incentive-title" id="incentive-title">Layak Insentif</div>
+                            <div class="incentive-desc" id="incentive-desc">Akumulasi telat: 0 / 20 menit</div>
+                            <div class="incentive-bar-wrap">
+                                <div class="incentive-bar" id="incentive-bar"></div>
+                            </div>
+                            <div class="incentive-detail" id="incentive-detail">💰 Insentif Rp 100.000 cair tanggal 25</div>
                         </div>
                     </div>
                 </div>
@@ -176,6 +191,10 @@
                         </div>
                         <div id="weekday-overtime-section">
                             <div class="form-group">
+                                <label>Jam Masuk</label>
+                                <input type="time" id="att-arrival" value="08:00">
+                            </div>
+                            <div class="form-group">
                                 <label>Lembur Sampai Jam</label>
                                 <select id="att-ot-end">
                                     <option value="none">Tidak Lembur (Pulang 17:00)</option>
@@ -188,6 +207,7 @@
                             <div class="info-box">
                                 <p>ℹ️ Jam kerja normal: 08:00 - 17:00</p>
                                 <p>☕ Istirahat lembur: 18:00 - 18:30 (30 menit)</p>
+                                <p>⏰ Keterlambatan > 20 menit/bulan = insentif hangus</p>
                             </div>
                         </div>
                     </div>
@@ -387,99 +407,9 @@
                 </div>
             </div>
 
-            <!-- ===== WORK CALENDAR (NEW) ===== -->
-            <div id="section-calendar" class="section">
-                <div class="card">
-                    <div class="card-header">
-                        <span>📅 Upload Kalender Kerja</span>
-                    </div>
-                    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">
-                        Upload foto kalender kerja tahunan. Tanggal merah & cuti bersama akan otomatis terdeteksi dari gambar.
-                    </p>
-
-                    <div class="calendar-upload-area" onclick="document.getElementById('calendar-file-input').click()">
-                        <input type="file" id="calendar-file-input" accept="image/*" onchange="WorkCalendar.handleUpload(this)">
-                        <div class="calendar-upload-icon">📸</div>
-                        <div class="calendar-upload-text">
-                            <strong>Klik untuk upload</strong> atau drag & drop<br>
-                            <small>Format: JPG, PNG, WEBP</small>
-                        </div>
-                    </div>
-
-                    <div id="calendar-preview-container" class="calendar-preview-container">
-                        <img id="calendar-preview" alt="Preview Kalender">
-                    </div>
-
-                    <div id="calendar-ocr-status" class="calendar-ocr-status"></div>
-
-                    <div class="cal-actions" id="calendar-actions" style="display:none;">
-                        <button class="btn btn-primary btn-sm" id="btn-parse-calendar" onclick="WorkCalendar.tryOCR(WorkCalendar.uploadedImage)" style="display:none;">
-                            🔍 Scan Ulang
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <span>🗓️ Kalender Interaktif</span>
-                    </div>
-                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">
-                        Tap tanggal untuk menandai: <strong>🔴 Merah</strong> = Tanggal Merah, <strong>🟡 Kuning</strong> = Cuti Bersama. Tap lagi untuk hapus.
-                    </p>
-
-                    <div class="cal-nav">
-                        <button class="cal-nav-btn" onclick="WorkCalendar.prevMonth()">‹</button>
-                        <span class="cal-nav-label" id="calendar-month-label">Juli 2026</span>
-                        <button class="cal-nav-btn" onclick="WorkCalendar.nextMonth()">›</button>
-                    </div>
-
-                    <div id="calendar-grid"></div>
-
-                    <div class="cal-legend">
-                        <div class="cal-legend-item">
-                            <div class="cal-legend-dot holiday"></div>
-                            <span>Tanggal Merah</span>
-                        </div>
-                        <div class="cal-legend-item">
-                            <div class="cal-legend-dot collective-leave"></div>
-                            <span>Cuti Bersama</span>
-                        </div>
-                        <div class="cal-legend-item">
-                            <div class="cal-legend-dot weekend"></div>
-                            <span>Weekend</span>
-                        </div>
-                    </div>
-
-                    <div class="bulk-actions">
-                        <button class="bulk-btn" onclick="WorkCalendar.bulkMark('weekend')">☑️ Tandai Weekend</button>
-                        <button class="bulk-btn" onclick="WorkCalendar.clearMonth()">🗑️ Hapus Bulan Ini</button>
-                    </div>
-
-                    <div class="cal-summary" id="calendar-summary">
-                        <div class="cal-summary-item">
-                            <div class="cal-summary-num" id="cal-count-holiday">0</div>
-                            <div class="cal-summary-label">Tanggal Merah</div>
-                        </div>
-                        <div class="cal-summary-item">
-                            <div class="cal-summary-num" id="cal-count-leave">0</div>
-                            <div class="cal-summary-label">Cuti Bersama</div>
-                        </div>
-                        <div class="cal-summary-item">
-                            <div class="cal-summary-num" id="cal-count-total">0</div>
-                            <div class="cal-summary-label">Total Ditandai</div>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary mt-8" onclick="WorkCalendar.applyToAttendance()">
-                        ✅ Terapkan ke Data Absensi
-                    </button>
-                    <div id="calendar-apply-result" class="result-box hidden"></div>
-                </div>
-            </div>
-
             <!-- Settings -->
             <div id="section-settings" class="section">
-                <!-- Notification Settings (NEW) -->
+                <!-- Notification Settings -->
                 <div class="card notif-section">
                     <div class="card-header"><span>🔔 Notifikasi Lembur</span></div>
                     <div class="notif-card">
@@ -608,10 +538,6 @@
                     <span class="nav-icon">🏖️</span>
                     <span class="nav-label">Cuti</span>
                 </button>
-                <button class="nav-btn" data-section="calendar" onclick="App.navigate('calendar')">
-                    <span class="nav-icon">📅</span>
-                    <span class="nav-label">Kalender</span>
-                </button>
             </nav>
         </div>
     </div>
@@ -621,7 +547,6 @@
     <script src="calc.js"></script>
     <script src="cloud.js"></script>
     <script src="notification.js"></script>
-    <script src="calendar.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
