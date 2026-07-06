@@ -47,6 +47,13 @@ const App = {
         if (typeof Cloud !== 'undefined') {
             Cloud.init();
         }
+        // Init calendar & notifications
+        if (typeof WorkCalendar !== 'undefined') {
+            WorkCalendar.init();
+        }
+        if (typeof Notif !== 'undefined') {
+            Notif.init();
+        }
     },
 
     navigate(section) {
@@ -59,6 +66,7 @@ const App = {
             overtime: 'Detail Lemburan',
             medical: 'Klaim & Benefit',
             leave: 'Cuti Tahunan',
+            calendar: 'Kalender Kerja',
             settings: 'Pengaturan'
         };
         document.getElementById('header-title').textContent = titles[section] || 'Dashboard';
@@ -77,7 +85,11 @@ const App = {
         if (section === 'overtime') Overtime.refresh();
         if (section === 'medical') { Medical.refresh(); Hospital.refresh(); }
         if (section === 'leave') Leave.refresh();
-        if (section === 'settings') Settings.loadProfile();
+        if (section === 'calendar') WorkCalendar.init();
+        if (section === 'settings') {
+            Settings.loadProfile();
+            Notif.updateUI();
+        }
     },
 
     initMonthSelectors() {
