@@ -79,14 +79,32 @@ const Calc = {
     /**
      * Calculate weekend/holiday overtime pay
      * @param {number} salary - Monthly salary
-     * @param {string} startTime - Start time "HH:MM"
+     * @param {string} startTime - Scheduled start time "HH:MM"
      * @param {string} endTime - End time "HH:MM"
-     * @returns {object} { hours, pay, detail }
+     * @param {string} arrivalTime - Actual arrival time "HH:MM" (optional)
+     * @returns {object} { hours, pay, detail, effectiveStart }
      */
-    calcWeekendOvertime(salary, startTime, endTime) {
+    calcWeekendOvertime(salary, startTime, endTime, arrivalTime) {
         const hourlyRate = this.getHourlyRate(salary);
-        const startMin = Utils.parseTime(startTime);
+        let startMin = Utils.parseTime(startTime);
         const endMin = Utils.parseTime(endTime);
+        let effectiveStart = startTime;
+        let lateNote = '';
+
+        // Weekend/Holiday late rule: if arrival > scheduled start + 1 min,
+        // round up to next half hour
+        if (arrivalTime) {
+            const arrivalMin = Utils.parseTime(arrivalTime);
+            if (arrivalMin > startMin + 1) {
+                // Round up to next half hour
+                const roundedUp = Math.ceil(arrivalMin / 30) * 30;
+                if (roundedUp > startMin) {
+                    startMin = roundedUp;
+                    effectiveStart = Utils.formatTime(roundedUp);
+                    lateNote = ` (telat, jam masuk disesuaikan: ${effectiveStart})`;
+                }
+            }
+        }
 
         // Break 12:00-13:00
         const breakStart = 12 * 60;
@@ -132,7 +150,8 @@ const Calc = {
         return {
             hours: totalHours,
             pay: Math.round(pay),
-            detail: `${totalHours.toFixed(1)} jam (8j × 2x${totalHours > 8 ? ` + ${(totalHours - 8).toFixed(1)}j × 3x/4x` : ''})`
+            detail: `${totalHours.toFixed(1)} jam (8j × 2x${totalHours > 8 ? ` + ${(totalHours - 8).toFixed(1)}j × 3x/4x` : ''})${lateNote}`,
+            effectiveStart
         };
     },
 
@@ -156,13 +175,13 @@ const Calc = {
             otHours = result.hours;
             detail = result.detail;
         } else if (attendance.type === 'weekend') {
-            const result = this.calcWeekendOvertime(salary, attendance.weekendStart, attendance.weekendEnd);
+            const result = this.calcWeekendOvertime(salary, attendance.weekendStart, attendance.weekendEnd, attendance.arrival);
             overtime = result.pay;
             otHours = result.hours;
             detail = result.detail;
         } else if (attendance.type === 'holiday') {
             // Holiday = same as weekend rate
-            const result = this.calcWeekendOvertime(salary, attendance.holidayStart, attendance.holidayEnd);
+            const result = this.calcWeekendOvertime(salary, attendance.holidayStart, attendance.holidayEnd, attendance.arrival);
             overtime = result.pay;
             otHours = result.hours;
             detail = 'Libur Nasional: ' + result.detail;

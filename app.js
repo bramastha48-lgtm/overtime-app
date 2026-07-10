@@ -399,10 +399,12 @@ const Attendance = {
             } else if (record.type === 'weekend') {
                 document.getElementById('att-wk-start').value = record.weekendStart || '08:00';
                 document.getElementById('att-wk-end').value = record.weekendEnd || '17:00';
+                document.getElementById('att-wk-arrival').value = record.arrival || '';
             } else if (record.type === 'holiday') {
                 document.getElementById('att-hol-present').value = record.present ? 'yes' : 'no';
                 document.getElementById('att-hol-start').value = record.holidayStart || '08:00';
                 document.getElementById('att-hol-end').value = record.holidayEnd || '17:00';
+                document.getElementById('att-hol-arrival').value = record.arrival || '';
                 this.toggleHolidayPresent();
             }
         } else {
@@ -455,6 +457,8 @@ const Attendance = {
             record.present = true; // Weekend always "present" if recorded
             record.weekendStart = document.getElementById('att-wk-start').value;
             record.weekendEnd = document.getElementById('att-wk-end').value;
+            const wkArrival = document.getElementById('att-wk-arrival').value;
+            if (wkArrival) record.arrival = wkArrival;
 
             // Validate
             if (Utils.parseTime(record.weekendEnd) <= Utils.parseTime(record.weekendStart)) {
@@ -464,6 +468,8 @@ const Attendance = {
             record.present = document.getElementById('att-hol-present').value === 'yes';
             record.holidayStart = document.getElementById('att-hol-start').value;
             record.holidayEnd = document.getElementById('att-hol-end').value;
+            const holArrival = document.getElementById('att-hol-arrival').value;
+            if (holArrival) record.arrival = holArrival;
         }
 
         DataStore.saveAttendance(dateStr, record);
@@ -955,37 +961,54 @@ const ClockInfo = {
 
         const profile = DataStore.getProfile();
         const existing = DataStore.getAttendance(dateStr);
+        const isWeekendOrHoliday = Utils.isWeekend(dateStr) || (existing && existing.type === 'holiday');
 
         // Create or update attendance record
-        let record = existing || { type: 'weekday', present: true };
+        let record = existing || { type: isWeekendOrHoliday ? (Utils.isWeekend(dateStr) ? 'weekend' : 'holiday') : 'weekday', present: true };
         record.present = true;
         record.arrival = timeStr;
-        if (!record.type) record.type = 'weekday';
+        if (!record.type) record.type = isWeekendOrHoliday ? 'weekend' : 'weekday';
         if (!record.overtimeEnd) record.overtimeEnd = 'none';
 
         DataStore.saveAttendance(dateStr, record);
 
-        // Calculate late
-        const arrivalMin = Utils.parseTime(timeStr);
-        const workStart = 8 * 60;
-        const lateMin = arrivalMin > workStart ? arrivalMin - workStart : 0;
         const yearMonth = dateStr.substring(0, 7);
-        const totalLate = Incentive.getMonthlyLate(yearMonth);
-        const status = Incentive.getStatus(yearMonth);
-
         let msg = `✅ <strong>${Utils.formatDateDisplay(dateStr)}</strong> — Jam masuk: <strong>${timeStr}</strong><br>`;
-        if (lateMin > 0) {
-            msg += `⏰ Telat: ${lateMin} menit<br>`;
-            msg += `📊 Akumulasi bulan ini: ${totalLate} / ${Incentive.MONTHLY_LATE_THRESHOLD} menit<br>`;
-            if (lateMin >= Incentive.SINGLE_LATE_THRESHOLD) {
-                msg += `<span style="color:#d93025;font-weight:700">❌ Telat ≥${Incentive.SINGLE_LATE_THRESHOLD} menit = insentif hangus!</span>`;
-            } else if (totalLate > Incentive.MONTHLY_LATE_THRESHOLD) {
-                msg += `<span style="color:#d93025;font-weight:700">❌ Akumulasi melebihi batas = insentif hangus!</span>`;
+
+        if (isWeekendOrHoliday) {
+            // Weekend/Holiday: apply rounding rule
+            const scheduledStart = record.type === 'weekend' ? (record.weekendStart || '08:00') : (record.holidayStart || '08:00');
+            const scheduledMin = Utils.parseTime(scheduledStart);
+            const arrivalMin = Utils.parseTime(timeStr);
+
+            if (arrivalMin > scheduledMin + 1) {
+                const roundedUp = Math.ceil(arrivalMin / 30) * 30;
+                const effectiveStart = Utils.formatTime(roundedUp);
+                msg += `⏰ Telat ${arrivalMin - scheduledMin} menit → jam masuk disesuaikan: <strong>${effectiveStart}</strong><br>`;
+                msg += `<span style="color:#e37400;font-weight:600">📋 Aturan: telat >1 menit = pembulatan ke setengah jam berikutnya</span>`;
             } else {
-                msg += `<span style="color:#0d904f;font-weight:700">✅ Insentif masih aman</span>`;
+                msg += `⏰ Tepat waktu ✅`;
             }
         } else {
-            msg += `⏰ Tepat waktu ✅ | Akumulasi telat: ${totalLate} menit`;
+            // Weekday: normal late tracking
+            const arrivalMin = Utils.parseTime(timeStr);
+            const workStart = 8 * 60;
+            const lateMin = arrivalMin > workStart ? arrivalMin - workStart : 0;
+            const totalLate = Incentive.getMonthlyLate(yearMonth);
+
+            if (lateMin > 0) {
+                msg += `⏰ Telat: ${lateMin} menit<br>`;
+                msg += `📊 Akumulasi bulan ini: ${totalLate} / ${Incentive.MONTHLY_LATE_THRESHOLD} menit<br>`;
+                if (lateMin >= Incentive.SINGLE_LATE_THRESHOLD) {
+                    msg += `<span style="color:#d93025;font-weight:700">❌ Telat ≥${Incentive.SINGLE_LATE_THRESHOLD} menit = insentif hangus!</span>`;
+                } else if (totalLate > Incentive.MONTHLY_LATE_THRESHOLD) {
+                    msg += `<span style="color:#d93025;font-weight:700">❌ Akumulasi melebihi batas = insentif hangus!</span>`;
+                } else {
+                    msg += `<span style="color:#0d904f;font-weight:700">✅ Insentif masih aman</span>`;
+                }
+            } else {
+                msg += `⏰ Tepat waktu ✅ | Akumulasi telat: ${totalLate} menit`;
+            }
         }
 
         Utils.showResult('checkin-result', msg, 'success');

@@ -229,16 +229,21 @@
 
                     <div id="att-weekend-panel" class="att-panel hidden">
                         <div class="form-group">
-                            <label>Jam Masuk</label>
+                            <label>Jam Masuk Terjadwal</label>
                             <input type="time" id="att-wk-start" value="08:00">
                         </div>
                         <div class="form-group">
                             <label>Jam Pulang</label>
                             <input type="time" id="att-wk-end" value="17:00">
                         </div>
+                        <div class="form-group">
+                            <label>Jam Kedatangan Aktual (opsional)</label>
+                            <input type="time" id="att-wk-arrival" placeholder="08:00">
+                        </div>
                         <div class="info-box">
                             <p>☕ Istirahat: 12:00 - 13:00 (1 jam)</p>
                             <p>💰 Rate: 2x gaji/jam (8 jam pertama), 3x gaji/jam (setelahnya)</p>
+                            <p>⚠️ Telat >1 menit → jam masuk dibulatkan ke setengah jam berikutnya</p>
                         </div>
                     </div>
 
@@ -252,17 +257,22 @@
                         </div>
                         <div id="holiday-detail-section">
                             <div class="form-group">
-                                <label>Jam Masuk</label>
+                                <label>Jam Masuk Terjadwal</label>
                                 <input type="time" id="att-hol-start" value="08:00">
                             </div>
                             <div class="form-group">
                                 <label>Jam Pulang</label>
                                 <input type="time" id="att-hol-end" value="17:00">
                             </div>
+                            <div class="form-group">
+                                <label>Jam Kedatangan Aktual (opsional)</label>
+                                <input type="time" id="att-hol-arrival" placeholder="08:00">
+                            </div>
                             <div class="info-box">
                                 <p>🔴 Tanggal Merah / Libur Nasional</p>
                                 <p>☕ Istirahat: 12:00 - 13:00 (1 jam)</p>
                                 <p>💰 Rate: 2x gaji/jam (8 jam pertama), 3x gaji/jam (setelahnya)</p>
+                                <p>⚠️ Telat >1 menit → jam masuk dibulatkan ke setengah jam berikutnya</p>
                             </div>
                         </div>
                     </div>
