@@ -142,6 +142,11 @@
                 <div class="card">
                     <div class="card-header">
                         <span>📅 Jadwal Pencairan Berikutnya</span>
+                        <div class="payout-nav">
+                            <button class="btn-icon-sm" onclick="Dashboard.prevPayout()" title="Periode sebelumnya">◀</button>
+                            <button class="btn-icon-sm" onclick="Dashboard.resetPayout()" title="Periode saat ini" style="font-size:12px">●</button>
+                            <button class="btn-icon-sm" onclick="Dashboard.nextPayout()" title="Periode berikutnya">▶</button>
+                        </div>
                     </div>
                     <div class="payout-info" id="next-payout-info">
                         <div class="payout-date">-</div>
@@ -419,6 +424,25 @@
 
             <!-- Clock Info (Jam Absensi) -->
             <div id="section-clockinfo" class="section">
+                <div class="card">
+                    <div class="card-header"><span>⏰ Absensi Kedatangan</span></div>
+                    <p class="checkin-desc">Catat jam masuk Anda hari ini untuk tracking keterlambatan</p>
+                    <div class="checkin-form">
+                        <div class="checkin-row">
+                            <div class="form-group" style="flex:1;margin-bottom:0">
+                                <label>Tanggal</label>
+                                <input type="date" id="checkin-date">
+                            </div>
+                            <div class="form-group" style="flex:1;margin-bottom:0">
+                                <label>Jam Masuk</label>
+                                <input type="time" id="checkin-time" value="08:00">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="ClockInfo.checkin()">✅ Catat Kedatangan</button>
+                        <div id="checkin-result" class="result-box hidden"></div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <span>🕐 Rekap Jam Absensi</span>

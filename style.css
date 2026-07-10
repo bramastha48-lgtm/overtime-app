@@ -875,6 +875,49 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
     padding-top: 10px;
 }
 
+/* ===== CHECKIN FORM ===== */
+.checkin-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+.checkin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.checkin-row {
+    display: flex;
+    gap: 10px;
+}
+.checkin-row .form-group label {
+    font-size: 12px;
+}
+
+/* ===== PAYOUT NAV ===== */
+.payout-nav {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.payout-nav .btn-icon-sm {
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+.payout-nav .btn-icon-sm:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+.payout-nav .btn-icon-sm:active {
+    transform: scale(0.95);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (min-width: 600px) {
     .section { padding: 16px 20px calc(var(--nav-height) + 20px); }

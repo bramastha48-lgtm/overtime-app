@@ -112,6 +112,12 @@ const App = {
 
 // === DASHBOARD ===
 const Dashboard = {
+    payoutOffset: 0, // 0 = current period, -1 = previous, +1 = next
+
+    prevPayout() { this.payoutOffset--; this.refresh(); },
+    nextPayout() { this.payoutOffset++; this.refresh(); },
+    resetPayout() { this.payoutOffset = 0; this.refresh(); },
+
     refresh() {
         const yearMonth = document.getElementById('dashboard-month').value;
         const profile = DataStore.getProfile();
@@ -145,11 +151,28 @@ const Dashboard = {
         document.getElementById('hospital-detail').textContent = `Total: ${Utils.formatRupiah(hospTotal)}`;
         document.getElementById('hospital-balance').textContent = Utils.formatRupiah(hospRemain);
 
-        // Next payout
-        const nextPayout = Utils.getNextPayoutDate();
-        document.querySelector('.payout-date').textContent = Utils.formatDateDisplay(nextPayout.payout);
-        document.querySelector('.payout-period').textContent =
+        // Next payout (with offset navigation)
+        const basePayout = Utils.getNextPayoutDate();
+        let nextPayout;
+        if (this.payoutOffset === 0) {
+            nextPayout = basePayout;
+        } else {
+            // Calculate offset period
+            const baseStart = new Date(basePayout.start + 'T00:00:00');
+            baseStart.setDate(baseStart.getDate() + (this.payoutOffset * 7));
+            const offsetStart = Utils.formatDate(baseStart);
+            nextPayout = Utils.getPayPeriod(offsetStart);
+        }
+
+        // Update header with navigation indicator
+        const payoutDateEl = document.querySelector('.payout-date');
+        const payoutPeriodEl = document.querySelector('.payout-period');
+        payoutDateEl.textContent = Utils.formatDateDisplay(nextPayout.payout);
+        payoutPeriodEl.textContent =
             `Periode: ${Utils.formatDateDisplay(nextPayout.start)} - ${Utils.formatDateDisplay(nextPayout.end)}`;
+        if (this.payoutOffset !== 0) {
+            payoutDateEl.textContent += this.payoutOffset < 0 ? ' (Sebelumnya)' : ' (Mendatang)';
+        }
 
         // Calculate payout amounts for this period
         const allAttendance = DataStore.load().attendance;
@@ -924,11 +947,65 @@ const Settings = {
 
 // === CLOCK INFO (Jam Absensi) ===
 const ClockInfo = {
+    checkin() {
+        const dateStr = document.getElementById('checkin-date').value;
+        const timeStr = document.getElementById('checkin-time').value;
+        if (!dateStr) return Utils.showResult('checkin-result', '❌ Pilih tanggal!', 'error');
+        if (!timeStr) return Utils.showResult('checkin-result', '❌ Masukkan jam masuk!', 'error');
+
+        const profile = DataStore.getProfile();
+        const existing = DataStore.getAttendance(dateStr);
+
+        // Create or update attendance record
+        let record = existing || { type: 'weekday', present: true };
+        record.present = true;
+        record.arrival = timeStr;
+        if (!record.type) record.type = 'weekday';
+        if (!record.overtimeEnd) record.overtimeEnd = 'none';
+
+        DataStore.saveAttendance(dateStr, record);
+
+        // Calculate late
+        const arrivalMin = Utils.parseTime(timeStr);
+        const workStart = 8 * 60;
+        const lateMin = arrivalMin > workStart ? arrivalMin - workStart : 0;
+        const yearMonth = dateStr.substring(0, 7);
+        const totalLate = Incentive.getMonthlyLate(yearMonth);
+        const status = Incentive.getStatus(yearMonth);
+
+        let msg = `✅ <strong>${Utils.formatDateDisplay(dateStr)}</strong> — Jam masuk: <strong>${timeStr}</strong><br>`;
+        if (lateMin > 0) {
+            msg += `⏰ Telat: ${lateMin} menit<br>`;
+            msg += `📊 Akumulasi bulan ini: ${totalLate} / ${Incentive.MONTHLY_LATE_THRESHOLD} menit<br>`;
+            if (lateMin >= Incentive.SINGLE_LATE_THRESHOLD) {
+                msg += `<span style="color:#d93025;font-weight:700">❌ Telat ≥${Incentive.SINGLE_LATE_THRESHOLD} menit = insentif hangus!</span>`;
+            } else if (totalLate > Incentive.MONTHLY_LATE_THRESHOLD) {
+                msg += `<span style="color:#d93025;font-weight:700">❌ Akumulasi melebihi batas = insentif hangus!</span>`;
+            } else {
+                msg += `<span style="color:#0d904f;font-weight:700">✅ Insentif masih aman</span>`;
+            }
+        } else {
+            msg += `⏰ Tepat waktu ✅ | Akumulasi telat: ${totalLate} menit`;
+        }
+
+        Utils.showResult('checkin-result', msg, 'success');
+        this.refresh();
+        Dashboard.refresh();
+    },
+
     refresh() {
         const yearMonth = document.getElementById('dashboard-month').value || Utils.today().substring(0, 7);
         const records = DataStore.getAttendanceForMonth(yearMonth);
         const profile = DataStore.getProfile();
         const status = Incentive.getStatus(yearMonth);
+
+        // Set default checkin date to today
+        const checkinDate = document.getElementById('checkin-date');
+        if (!checkinDate.value) checkinDate.value = Utils.today();
+        const todayRecord = DataStore.getAttendance(Utils.today());
+        if (todayRecord && todayRecord.arrival) {
+            document.getElementById('checkin-time').value = todayRecord.arrival;
+        }
 
         // Update summary
         const weekdays = Object.entries(records).filter(([, r]) => r.type === 'weekday' && r.present);
