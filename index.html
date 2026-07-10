@@ -147,7 +147,16 @@
                         <div class="payout-date">-</div>
                         <div class="payout-period">-</div>
                         <div class="payout-breakdown">
+                            <div class="payout-row payout-highlight" id="payout-today-row">
+                                <span>💵 Cair Hari Ini</span>
+                                <span id="payout-today">Rp 0</span>
+                            </div>
                             <div class="payout-row">
+                                <span>📅 Cair Minggu Ini</span>
+                                <span id="payout-week">Rp 0</span>
+                            </div>
+                            <div class="payout-row-sub" id="payout-week-period">-</div>
+                            <div class="payout-row payout-divider">
                                 <span>💰 Lemburan</span>
                                 <span id="payout-overtime">Rp 0</span>
                             </div>
@@ -160,7 +169,7 @@
                                 <span id="payout-mc">Rp 0</span>
                             </div>
                             <div class="payout-row payout-total">
-                                <span><strong>Total Cair</strong></span>
+                                <span><strong>Total Periode Ini</strong></span>
                                 <span id="payout-total"><strong>Rp 0</strong></span>
                             </div>
                         </div>
@@ -207,7 +216,8 @@
                             <div class="info-box">
                                 <p>ℹ️ Jam kerja normal: 08:00 - 17:00</p>
                                 <p>☕ Istirahat lembur: 18:00 - 18:30 (30 menit)</p>
-                                <p>⏰ Keterlambatan > 20 menit/bulan = insentif hangus</p>
+                                <p>⏰ Akumulasi telat > 20 menit/bulan = insentif hangus</p>
+                                <p>⚠️ Telat ≥ 15 menit dalam 1 hari = langsung hangus</p>
                             </div>
                         </div>
                     </div>
@@ -407,6 +417,56 @@
                 </div>
             </div>
 
+            <!-- Clock Info (Jam Absensi) -->
+            <div id="section-clockinfo" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <span>🕐 Rekap Jam Absensi</span>
+                        <select id="clock-month" onchange="ClockInfo.refresh()"></select>
+                    </div>
+                    <div class="clock-summary">
+                        <div class="clock-sum-item">
+                            <div class="clock-sum-val" id="clock-total-days">0</div>
+                            <div class="clock-sum-label">Hari Masuk</div>
+                        </div>
+                        <div class="clock-sum-item">
+                            <div class="clock-sum-val text-success" id="clock-ontime">0</div>
+                            <div class="clock-sum-label">Tepat Waktu</div>
+                        </div>
+                        <div class="clock-sum-item">
+                            <div class="clock-sum-val text-warning" id="clock-late">0</div>
+                            <div class="clock-sum-label">Telat</div>
+                        </div>
+                        <div class="clock-sum-item">
+                            <div class="clock-sum-val text-danger" id="clock-absent">0</div>
+                            <div class="clock-sum-label">Tidak Masuk</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span>🎯 Status Insentif</span></div>
+                    <div class="incentive-box" id="clock-incentive-box">
+                        <div class="incentive-icon" id="clock-incentive-icon">✅</div>
+                        <div class="incentive-info">
+                            <div class="incentive-title" id="clock-incentive-title">Layak Insentif</div>
+                            <div class="incentive-desc" id="clock-incentive-desc">-</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top:10px">
+                        <p>📋 <strong>Aturan Insentif:</strong></p>
+                        <p>• Akumulasi telat ≤ 20 menit/bulan = Rp 100.000</p>
+                        <p>• Telat ≥ 15 menit dalam 1 hari = langsung hangus</p>
+                        <p>• Cair setiap tanggal 25</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span>📋 Detail Harian</span></div>
+                    <div class="clock-daily" id="clock-daily-list"></div>
+                </div>
+            </div>
+
             <!-- Settings -->
             <div id="section-settings" class="section">
                 <!-- Notification Settings -->
@@ -534,9 +594,9 @@
                     <span class="nav-icon">🏥</span>
                     <span class="nav-label">Klaim</span>
                 </button>
-                <button class="nav-btn" data-section="leave" onclick="App.navigate('leave')">
-                    <span class="nav-icon">🏖️</span>
-                    <span class="nav-label">Cuti</span>
+                <button class="nav-btn" data-section="clockinfo" onclick="App.navigate('clockinfo')">
+                    <span class="nav-icon">🕐</span>
+                    <span class="nav-label">Jam Absensi</span>
                 </button>
             </nav>
         </div>
