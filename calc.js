@@ -106,25 +106,28 @@ const Calc = {
             }
         }
 
-        // Break 12:00-13:00
-        const breakStart = 12 * 60;
-        const breakEnd = 13 * 60;
+        // Break 12:00-13:00 and 18:00-18:30
+        const break1Start = 12 * 60;
+        const break1End = 13 * 60;
+        const break2Start = 18 * 60;
+        const break2End = 18 * 60 + 30;
 
-        // Calculate effective work minutes (excluding break)
+        // Helper: check if minute is in any break
+        const inBreak = (m) =>
+            (m >= break1Start && m < break1End) ||
+            (m >= break2Start && m < break2End);
+
+        // Calculate effective work minutes (excluding breaks)
         let effectiveMinutes = 0;
         let current = startMin;
 
         while (current < endMin) {
-            const nextMin = Math.min(current + 1, endMin);
-
-            // Check if current minute is in break
-            if (current >= breakStart && current < breakEnd) {
-                // Skip break
-                current = breakEnd;
+            if (inBreak(current)) {
+                current++;
                 continue;
             }
             effectiveMinutes++;
-            current = nextMin;
+            current++;
         }
 
         const totalHours = effectiveMinutes / 60;
