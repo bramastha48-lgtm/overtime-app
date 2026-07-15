@@ -198,58 +198,6 @@ const Dashboard = {
         document.getElementById('payout-mc').textContent = Utils.formatRupiah(periodMc + periodHospital);
         document.getElementById('payout-total').textContent = Utils.formatRupiah(periodTotal);
 
-        // === Today's payout ===
-        const todayStr = Utils.today();
-        let todayTotal = 0;
-        if (todayStr >= nextPayout.start && todayStr <= nextPayout.end) {
-            const todayRecord = allAttendance[todayStr];
-            if (todayRecord && todayRecord.present) {
-                const te = Calc.calcDayEarning(profile.salary, todayRecord);
-                todayTotal = te.overtime + te.meal;
-            }
-            // Add today's MC/hospital claims
-            const todayMc = periodMcClaims.filter(c => c.date === todayStr).reduce((s, c) => s + c.amount, 0);
-            const todayHosp = periodHospitalClaims.filter(c => c.date === todayStr).reduce((s, c) => s + c.amount, 0);
-            todayTotal += todayMc + todayHosp;
-        }
-        const todayIncentive = (todayStr === `${yearMonth}-25` && Incentive.getStatus(yearMonth).eligible) ? 100000 : 0;
-        todayTotal += todayIncentive;
-        document.getElementById('payout-today').textContent = Utils.formatRupiah(todayTotal);
-        if (todayTotal > 0) {
-            document.getElementById('payout-today-row').classList.add('payout-highlight');
-        } else {
-            document.getElementById('payout-today-row').classList.remove('payout-highlight');
-        }
-
-        // === This week's payout ===
-        const now = new Date();
-        const dayOfWeek = now.getDay(); // 0=Sun
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Monday
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // Sunday
-
-        let weekTotal = 0;
-        const wStart = Utils.formatDate(weekStart);
-        const wEnd = Utils.formatDate(weekEnd);
-        for (const [dateStr, record] of Object.entries(allAttendance)) {
-            if (dateStr >= wStart && dateStr <= wEnd && record.present) {
-                const earning = Calc.calcDayEarning(profile.salary, record);
-                weekTotal += earning.overtime + earning.meal;
-            }
-        }
-        // Add week's MC/hospital claims
-        const weekMc = DataStore.getMcClaims().filter(c => c.date >= wStart && c.date <= wEnd).reduce((s, c) => s + c.amount, 0);
-        const weekHosp = DataStore.getHospitalClaims().filter(c => c.date >= wStart && c.date <= wEnd).reduce((s, c) => s + c.amount, 0);
-        weekTotal += weekMc + weekHosp;
-        // Add incentive if 25th falls in this week
-        const month25 = `${yearMonth}-25`;
-        if (month25 >= wStart && month25 <= wEnd && Incentive.getStatus(yearMonth).eligible) {
-            weekTotal += 100000;
-        }
-        document.getElementById('payout-week').textContent = Utils.formatRupiah(weekTotal);
-        document.getElementById('payout-week-period').textContent = `${Utils.formatDateDisplay(wStart)} - ${Utils.formatDateDisplay(wEnd)}`;
-
         // Update incentive
         this.refreshIncentive(yearMonth);
     },
