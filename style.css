@@ -919,7 +919,221 @@ input, select, button, textarea { font-family: inherit; font-size: inherit; }
 }
 
 /* ===== RESPONSIVE ===== */
+
+/* Tablet (600px+) */
 @media (min-width: 600px) {
-    .section { padding: 16px 20px calc(var(--nav-height) + 20px); }
-    .setup-container { padding: 60px 24px; }
+    .section {
+        padding: 20px 24px 24px;
+        max-width: 720px;
+    }
+    .setup-container { padding: 60px 24px; max-width: 520px; }
+    .summary-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    .summary-item.highlight {
+        grid-column: 1 / -1;
+    }
+    .clock-summary {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+    .leave-info-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    .att-recap { max-height: 500px; }
+    .ot-detail-list { max-height: 600px; }
+    .claim-history { max-height: 400px; }
+    .leave-history { max-height: 400px; }
+    .clock-daily { max-height: 600px; }
+}
+
+/* Desktop (900px+) */
+@media (min-width: 900px) {
+    :root {
+        --sidebar-width: 220px;
+        --nav-height: 0px;
+    }
+
+    html, body {
+        overflow: auto;
+        height: auto;
+        position: static;
+    }
+
+    #app {
+        flex-direction: row;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .page.active {
+        flex-direction: row;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    /* Sidebar */
+    .bottom-nav {
+        position: static;
+        flex-direction: column;
+        width: var(--sidebar-width);
+        height: 100%;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+        padding: 0;
+        padding-top: env(safe-area-inset-top, 0px);
+        overflow-y: auto;
+    }
+    .nav-btn {
+        flex: none;
+        flex-direction: row;
+        gap: 12px;
+        padding: 14px 20px;
+        justify-content: flex-start;
+        border-left: 3px solid transparent;
+        border-radius: 0;
+    }
+    .nav-btn.active {
+        background: var(--primary-light);
+        border-left-color: var(--primary);
+    }
+    .nav-icon { font-size: 20px; }
+    .nav-label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Content area */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .section {
+        flex: 1;
+        max-width: 960px;
+        padding: 24px 32px 32px;
+        overflow-y: auto;
+    }
+
+    /* Wider grids for desktop */
+    .summary-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .summary-item.highlight {
+        grid-column: 1 / -1;
+    }
+
+    /* Two-column card layout */
+    .section > .card {
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    /* Dashboard two-column */
+    #section-dashboard {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-content: start;
+    }
+    #section-dashboard > .card {
+        margin-bottom: 0;
+    }
+    /* Summary card spans full width */
+    #section-dashboard > .card:first-child {
+        grid-column: 1 / -1;
+    }
+
+    /* Medical two-column */
+    #section-medical {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-content: start;
+    }
+    #section-medical > .card {
+        margin-bottom: 0;
+    }
+
+    /* Leave two-column */
+    #section-leave {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-content: start;
+    }
+    #section-leave > .card {
+        margin-bottom: 0;
+    }
+
+    /* Clock info two-column */
+    #section-clockinfo {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-content: start;
+    }
+    #section-clockinfo > .card {
+        margin-bottom: 0;
+    }
+
+    /* Settings two-column */
+    #section-settings {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-content: start;
+    }
+    #section-settings > .card {
+        margin-bottom: 0;
+    }
+
+    /* Overtime stays single column */
+    #section-overtime {
+        display: block !important;
+    }
+
+    /* Attendance two-column */
+    #section-attendance {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-content: start;
+    }
+    #section-attendance > .card {
+        margin-bottom: 0;
+    }
+
+    /* Setup page centered */
+    .setup-container {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+
+    /* Wider claim/history lists on desktop */
+    .att-recap { max-height: none; }
+    .ot-detail-list { max-height: none; }
+    .claim-history { max-height: none; }
+    .leave-history { max-height: none; }
+    .clock-daily { max-height: none; }
+}
+
+/* Large desktop (1200px+) */
+@media (min-width: 1200px) {
+    :root {
+        --sidebar-width: 240px;
+    }
+    .section {
+        max-width: 1100px;
+        padding: 28px 40px 40px;
+    }
 }
