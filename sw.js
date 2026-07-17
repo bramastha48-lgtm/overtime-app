@@ -1,20 +1,19 @@
 /* ===== SW.JS - Service Worker for Notifications ===== */
 
-const CACHE_NAME = 'lemburku-v2';
+const CACHE_NAME = 'lemburku-v3';
 const ASSETS = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/app.js',
-    '/calc.js',
-    '/data.js',
-    '/utils.js',
-    '/cloud.js',
-    '/notification.js',
-    '/calendar.js',
-    '/manifest.json',
-    '/icon-192.png',
-    '/icon-512.png'
+    '/overtime-app/',
+    '/overtime-app/index.html',
+    '/overtime-app/style.css',
+    '/overtime-app/app.js',
+    '/overtime-app/calc.js',
+    '/overtime-app/data.js',
+    '/overtime-app/utils.js',
+    '/overtime-app/cloud.js',
+    '/overtime-app/notification.js',
+    '/overtime-app/manifest.json',
+    '/overtime-app/icon-192.png',
+    '/overtime-app/icon-512.png'
 ];
 
 // Install
@@ -62,7 +61,7 @@ self.addEventListener('notificationclick', event => {
                 }
             }
             if (clients.openWindow) {
-                return clients.openWindow(event.notification.data?.url || '/');
+                return clients.openWindow(event.notification.data?.url || '/overtime-app/');
             }
         })
     );
