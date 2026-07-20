@@ -885,6 +885,13 @@ const Settings = {
             <p>• Akumulasi telat > 20 menit/bulan → insentif hangus</p>
             <p>• Cair tanggal 25 setiap bulan</p>
         `;
+
+        // Populate cloud user ID for sync
+        const uidEl = document.getElementById('cloudUserId');
+        if (uidEl) {
+            const uid = (typeof Cloud !== 'undefined' && Cloud.user) ? Cloud.user.uid : '';
+            uidEl.value = uid || 'Menunggu koneksi...';
+        }
     },
 
     resetAll() {

@@ -591,6 +591,17 @@
                 </div>
 
                 <div class="card">
+                    <div class="card-header"><span>🔗 User ID untuk Sinkronisasi</span></div>
+                    <div style="background:var(--blue-light,#DBEAFE);padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px;color:var(--gray-700,#374151)">
+                        Gunakan ID ini untuk menghubungkan aplikasi <b>Walletly</b> agar uang lembur otomatis masuk sebagai pemasukan.
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="text" id="cloudUserId" readonly style="flex:1;padding:10px;border:2px solid var(--gray-200,#E5E7EB);border-radius:8px;font-size:13px;font-family:monospace;background:var(--gray-50,#F9FAFB)">
+                        <button class="btn btn-outline" onclick="navigator.clipboard.writeText(document.getElementById('cloudUserId').value).then(()=>Utils.showToast('User ID disalin! 📋'))" style="width:auto;padding:10px 16px">📋 Salin</button>
+                    </div>
+                </div>
+
+                <div class="card">
                     <div class="card-header"><span>🗑️ Reset Data</span></div>
                     <div class="info-box">
                         <p>⚠️ Reset akan menghapus <strong>semua data</strong>: profil, absensi, klaim, dan cuti.</p>
