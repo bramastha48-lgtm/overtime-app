@@ -363,5 +363,11 @@ const Cloud = {
                     </div>
                 </div>`;
         }
+
+        // Update User ID for sync
+        const uidEl = document.getElementById('cloudUserId');
+        if (uidEl) {
+            uidEl.value = (this.ready && this.user) ? this.user.uid : 'Menunggu koneksi...';
+        }
     }
 };
