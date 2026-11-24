@@ -222,7 +222,7 @@ const Dashboard = {
             desc.textContent = `Akumulasi telat: ${lateMinutes} / ${threshold} menit`;
             bar.style.width = `${Math.min(100, (lateMinutes / threshold) * 100)}%`;
             bar.className = 'incentive-bar bar-safe';
-            detail.textContent = '💰 Insentif Rp 100.000 cair tanggal 25';
+            detail.textContent = '💰 Insentif Rp 100.000 cair Jumat minggu ke-3';
         } else {
             box.className = 'incentive-box not-eligible';
             icon.textContent = '❌';
@@ -883,7 +883,7 @@ const Settings = {
             <p>• Akumulasi telat ≤ 20 menit/bulan → Rp 100.000</p>
             <p>• Telat ≥ 15 menit dalam 1 hari → langsung hangus</p>
             <p>• Akumulasi telat > 20 menit/bulan → insentif hangus</p>
-            <p>• Cair tanggal 25 setiap bulan</p>
+            <p>• Cair Jumat minggu ke-3 setiap bulan</p>
         `;
 
         // Populate cloud user ID for sync
