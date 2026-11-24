@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a73e8">
+    <meta name="theme-color" content="#0b1220">
     <title>Kalkulator Lembur & Benefit</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
@@ -17,7 +17,7 @@
         <div id="page-setup" class="page active">
             <div class="setup-container">
                 <div class="setup-header">
-                    <div class="setup-icon">⚙️</div>
+                    <div class="setup-icon">💰</div>
                     <h1>Setup Profil Karyawan</h1>
                     <p>Masukkan data Anda untuk memulai</p>
                 </div>
@@ -89,7 +89,7 @@
 
                 <!-- Insentif Card -->
                 <div class="card">
-                    <div class="card-header"><span>🎯 Insentif Bulanan</span></div>
+                    <div class="card-header"><span>🎯 Insentif Bulanan</span><span class="card-sub" style="margin:0">Rp 100.000</span></div>
                     <div class="incentive-box" id="incentive-box">
                         <div class="incentive-icon" id="incentive-icon">✅</div>
                         <div class="incentive-info">
@@ -101,12 +101,13 @@
                             <div class="incentive-detail" id="incentive-detail">💰 Insentif Rp 100.000 cair tanggal 25</div>
                         </div>
                     </div>
+                    <div class="payout-note">📅 Cair: <strong>Jumat minggu ke-3</strong> setiap bulan — kalau layak insentif, uangnya cair di Jumat minggu ke-3.</div>
                 </div>
 
                 <div class="card">
                     <div class="card-header"><span>📋 Saldo Benefit</span></div>
                     <div class="balance-list">
-                        <div class="balance-item">
+                        <div class="balance-item clickable" onclick="App.navigate('leave')">
                             <div class="balance-info">
                                 <span class="balance-icon">🏖️</span>
                                 <div>
@@ -116,7 +117,7 @@
                             </div>
                             <div class="balance-value" id="leave-remaining">0 hari</div>
                         </div>
-                        <div class="balance-item">
+                        <div class="balance-item clickable" onclick="App.navigate('medical')">
                             <div class="balance-info">
                                 <span class="balance-icon">🏥</span>
                                 <div>
@@ -126,7 +127,7 @@
                             </div>
                             <div class="balance-value" id="mc-balance">Rp 0</div>
                         </div>
-                        <div class="balance-item">
+                        <div class="balance-item clickable" onclick="App.navigate('medical')">
                             <div class="balance-info">
                                 <span class="balance-icon">🛏️</span>
                                 <div>
@@ -144,10 +145,11 @@
                         <span>📅 Jadwal Pencairan Berikutnya</span>
                         <div class="payout-nav">
                             <button class="btn-icon-sm" onclick="Dashboard.prevPayout()" title="Periode sebelumnya">◀</button>
-                            <button class="btn-icon-sm" onclick="Dashboard.resetPayout()" title="Periode saat ini" style="font-size:12px">●</button>
+                            <button class="btn-icon-sm reset-dot" onclick="Dashboard.resetPayout()" title="Periode saat ini">●</button>
                             <button class="btn-icon-sm" onclick="Dashboard.nextPayout()" title="Periode berikutnya">▶</button>
                         </div>
                     </div>
+                    <div class="card-sub">Periode Kamis → Rabu • Cair Jumat minggu ke-2</div>
                     <div class="payout-info" id="next-payout-info">
                         <div class="payout-date">-</div>
                         <div class="payout-period">-</div>
@@ -232,9 +234,9 @@
                             <input type="time" id="att-wk-arrival" placeholder="08:00">
                         </div>
                         <div class="info-box">
-                            <p>☕ Istirahat: 12:00 - 13:00 (1 jam) & 18:00 - 18:30 (30 menit)</p>
+                            <p>☕ Istirahat: 12:00 - 13:00 (1 jam) &amp; 18:00 - 18:30 (30 menit)</p>
                             <p>💰 Rate: 2x gaji/jam (8 jam pertama), 3x gaji/jam (setelahnya)</p>
-                            <p>⚠️ Telat >1 menit → jam masuk dibulatkan ke setengah jam berikutnya</p>
+                            <p>⚠️ Telat &gt;1 menit → jam masuk dibulatkan ke setengah jam berikutnya</p>
                         </div>
                     </div>
 
@@ -261,9 +263,9 @@
                             </div>
                             <div class="info-box">
                                 <p>🔴 Tanggal Merah / Libur Nasional</p>
-                                <p>☕ Istirahat: 12:00 - 13:00 (1 jam) & 18:00 - 18:30 (30 menit)</p>
+                                <p>☕ Istirahat: 12:00 - 13:00 (1 jam) &amp; 18:00 - 18:30 (30 menit)</p>
                                 <p>💰 Rate: 2x gaji/jam (8 jam pertama), 3x gaji/jam (setelahnya)</p>
-                                <p>⚠️ Telat >1 menit → jam masuk dibulatkan ke setengah jam berikutnya</p>
+                                <p>⚠️ Telat &gt;1 menit → jam masuk dibulatkan ke setengah jam berikutnya</p>
                             </div>
                         </div>
                     </div>
@@ -332,6 +334,7 @@
                 <div class="card">
                     <div class="card-header"><span>📋 Riwayat Klaim MC</span></div>
                     <div id="mc-claim-history" class="claim-history"></div>
+                    <div class="card-sub" style="margin:12px 0 0">Tiap klaim menampilkan tanggal cairnya (Jumat minggu ke-2 setelah periode Kamis → Rabu).</div>
                 </div>
 
                 <div class="card">
@@ -358,6 +361,7 @@
                 <div class="card">
                     <div class="card-header"><span>📋 Riwayat Klaim Rawat Inap</span></div>
                     <div id="hospital-claim-history" class="claim-history"></div>
+                    <div class="card-sub" style="margin:12px 0 0">Tiap klaim menampilkan tanggal cairnya (Jumat minggu ke-2 setelah periode Kamis → Rabu).</div>
                 </div>
             </div>
 
@@ -368,8 +372,8 @@
                     <div class="leave-visual">
                         <div class="leave-circle">
                             <svg viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" stroke-width="8"/>
-                                <circle cx="50" cy="50" r="45" fill="none" stroke="#1a73e8" stroke-width="8"
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#26314d" stroke-width="8"/>
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="8"
                                     stroke-dasharray="283" id="leave-circle-fill"
                                     stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
                             </svg>
@@ -430,11 +434,11 @@
                     <p class="checkin-desc">Catat jam masuk Anda hari ini untuk tracking keterlambatan</p>
                     <div class="checkin-form">
                         <div class="checkin-row">
-                            <div class="form-group" style="flex:1;margin-bottom:0">
+                            <div class="form-group">
                                 <label>Tanggal</label>
                                 <input type="date" id="checkin-date">
                             </div>
-                            <div class="form-group" style="flex:1;margin-bottom:0">
+                            <div class="form-group">
                                 <label>Jam Masuk</label>
                                 <input type="time" id="checkin-time" value="08:00">
                             </div>
@@ -482,7 +486,7 @@
                         <p>📋 <strong>Aturan Insentif:</strong></p>
                         <p>• Akumulasi telat ≤ 20 menit/bulan = Rp 100.000</p>
                         <p>• Telat ≥ 15 menit dalam 1 hari = langsung hangus</p>
-                        <p>• Cair setiap tanggal 25</p>
+                        <p>• Cair: Jumat minggu ke-3</p>
                     </div>
                 </div>
 
@@ -592,11 +596,11 @@
 
                 <div class="card">
                     <div class="card-header"><span>🔗 User ID untuk Sinkronisasi</span></div>
-                    <div style="background:var(--blue-light,#DBEAFE);padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px;color:var(--gray-700,#374151)">
+                    <div class="walletly-note">
                         Gunakan ID ini untuk menghubungkan aplikasi <b>Walletly</b> agar uang lembur otomatis masuk sebagai pemasukan.
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <input type="text" id="cloudUserId" readonly style="flex:1;padding:10px;border:2px solid var(--gray-200,#E5E7EB);border-radius:8px;font-size:13px;font-family:monospace;background:var(--gray-50,#F9FAFB)">
+                    <div class="uid-row">
+                        <input type="text" id="cloudUserId" readonly class="uid-input">
                         <button class="btn btn-outline" onclick="navigator.clipboard.writeText(document.getElementById('cloudUserId').value).then(()=>Utils.showToast('User ID disalin! 📋'))" style="width:auto;padding:10px 16px">📋 Salin</button>
                     </div>
                 </div>
@@ -630,9 +634,13 @@
                     <span class="nav-icon">🏥</span>
                     <span class="nav-label">Klaim</span>
                 </button>
+                <button class="nav-btn" data-section="leave" onclick="App.navigate('leave')">
+                    <span class="nav-icon">🏖️</span>
+                    <span class="nav-label">Cuti</span>
+                </button>
                 <button class="nav-btn" data-section="clockinfo" onclick="App.navigate('clockinfo')">
                     <span class="nav-icon">🕐</span>
-                    <span class="nav-label">Jam Absensi</span>
+                    <span class="nav-label">Jam</span>
                 </button>
             </nav>
         </div>
