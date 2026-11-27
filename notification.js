@@ -144,7 +144,7 @@ const Notif = {
 
         const title = `💰 Laporan Lembur Minggu Ini`;
         const body = earnings.daysWorked > 0
-            ? `Total: ${Utils.formatRupiah(earnings.total)} (${earnings.daysWorked} hari)\nLembur: ${Utils.formatRupiah(earnings.totalOvertime)} + Makan: ${Utils.formatRupiah(earnings.totalMeal)}\nPeriode: ${Utils.formatDateDisplay(period.start)} - ${Utils.formatDateDisplay(period.end)}`
+            ? `Total: ${Utils.formatRupiah(Math.round(earnings.total / 1000) * 1000)} (${earnings.daysWorked} hari)\nLembur: ${Utils.formatRupiah(earnings.totalOvertime)} + Makan: ${Utils.formatRupiah(earnings.totalMeal)}\nPeriode: ${Utils.formatDateDisplay(period.start)} - ${Utils.formatDateDisplay(period.end)}`
             : `Tidak ada data lembur minggu ini.\nPeriode: ${Utils.formatDateDisplay(period.start)} - ${Utils.formatDateDisplay(period.end)}`;
 
         try {

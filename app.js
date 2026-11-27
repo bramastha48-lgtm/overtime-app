@@ -192,11 +192,13 @@ const Dashboard = {
             c.date >= nextPayout.start && c.date <= nextPayout.end);
         const periodHospital = periodHospitalClaims.reduce((s, c) => s + c.amount, 0);
         const periodTotal = periodOvertime + periodMeal + periodMc + periodHospital;
+        // Pembulatan payroll perusahaan: ke ribuan terdekat (500 ke atas naik, di bawah 500 turun)
+        const periodTotalRounded = Math.round(periodTotal / 1000) * 1000;
 
         document.getElementById('payout-overtime').textContent = Utils.formatRupiah(periodOvertime);
         document.getElementById('payout-meal').textContent = Utils.formatRupiah(periodMeal);
         document.getElementById('payout-mc').textContent = Utils.formatRupiah(periodMc + periodHospital);
-        document.getElementById('payout-total').textContent = Utils.formatRupiah(periodTotal);
+        document.getElementById('payout-total').textContent = Utils.formatRupiah(periodTotalRounded);
 
         // Update incentive
         this.refreshIncentive(yearMonth);
